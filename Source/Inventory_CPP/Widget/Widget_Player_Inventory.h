@@ -13,5 +13,16 @@ UCLASS()
 class INVENTORY_CPP_API UWidget_Player_Inventory : public UUserWidget
 {
 	GENERATED_BODY()
+
+protected:
+	virtual bool Initialize() override;
 	
+public:
+	void ShowInventory(class UInventoryComponent* InventoryComponent);
+	void UpdateInventory(class UInventoryComponent* InventoryComponent);
+
+	UClass* InventoryGridClass;
+
+	UPROPERTY()
+	class UWidget_Inventory* InventoryWidget;
 };

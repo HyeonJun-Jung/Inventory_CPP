@@ -27,5 +27,5 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UCanvasPanel* CanvasPanel;
 
-	class UWidget_Inventory* InventoryWidget;
+	class UWidget_Player_Inventory* Widget_PlayerInventory;
 };

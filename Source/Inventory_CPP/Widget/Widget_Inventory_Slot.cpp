@@ -43,7 +43,7 @@ void UWidget_Inventory_Slot::UpdateSlot(FName Name, UTexture2D* Icon, uint8 quan
 	Item_Image->SetBrushFromTexture(Icon);
 	Item_Quantity->SetText(UKismetTextLibrary::Conv_IntToText(quantity));
 
-	if (!Name.IsEqual(FName("None")) || Quantity == 0)
+	if (Quantity != 0)
 	{
 		Item_Image->SetVisibility(ESlateVisibility::Visible);
 		Item_Quantity->SetVisibility(ESlateVisibility::Visible);

@@ -4,23 +4,24 @@
 #include "Widget/Widget_Player_HUD.h"
 #include "Component/InventoryComponent.h"
 #include "Widget_Inventory.h"
+#include "Widget/Widget_Player_Inventory.h"
 
 bool UWidget_Player_HUD::Initialize()
 {
 	Super::Initialize();
 
-	FStringClassReference InventoryWidgetClassRef(TEXT("/Game/Inventory/Widget/WBP_Inventory.WBP_Inventory_C"));
-	InventoryWidgetClass = InventoryWidgetClassRef.TryLoadClass<UWidget_Inventory>();
+	FStringClassReference InventoryWidgetClassRef(TEXT("/Game/Inventory/Widget/WBP_Player_Inventory.WBP_Player_Inventory_C"));
+	InventoryWidgetClass = InventoryWidgetClassRef.TryLoadClass<UWidget_Player_Inventory>();
 	if (!InventoryWidgetClass)
 	{
-		UE_LOG(LogTemp, Display, TEXT("UWidget_Player_HUD: Can't Load UWidget_Inventory Class."));
+		UE_LOG(LogTemp, Display, TEXT("UWidget_Player_HUD: Can't Load UWidget_Player_Inventory Class."));
 		return false;
 	}
 
-	InventoryWidget = CreateWidget<UWidget_Inventory>(this, InventoryWidgetClass);
-	if (!InventoryWidget)
+	Widget_PlayerInventory = CreateWidget<UWidget_Player_Inventory>(this, InventoryWidgetClass);
+	if (!Widget_PlayerInventory)
 	{
-		UE_LOG(LogTemp, Display, TEXT("UWidget_Player_HUD: Can't Create UWidget_Inventory Widget."));
+		UE_LOG(LogTemp, Display, TEXT("UWidget_Player_HUD: Can't Create UWidget_Player_Inventory Widget."));
 		return false;
 	}
 
@@ -30,56 +31,26 @@ bool UWidget_Player_HUD::Initialize()
 		return false;
 	}
 
-	InventoryWidget->AddToViewport(); 
-	InventoryWidget->SetVisibility(ESlateVisibility::Hidden);
+	Widget_PlayerInventory->AddToViewport();
+	Widget_PlayerInventory->SetVisibility(ESlateVisibility::Hidden);
 
 	return true;
 }
 
 void UWidget_Player_HUD::ShowInventory(UInventoryComponent* InventoryComponent)
 {
-	if (!InventoryWidget)
+	if (!Widget_PlayerInventory)
 	{
-		UE_LOG(LogTemp, Display, TEXT("UWidget_Player_HUD: Can't Get UWidget_Inventory Widget."));
+		UE_LOG(LogTemp, Display, TEXT("UWidget_Player_HUD: Can't Get UWidget_Player_Inventory Widget."));
 		return;
 	}
 
-	ESlateVisibility InvVisibility = InventoryWidget->GetVisibility();
-
-	if (InvVisibility == ESlateVisibility::Visible)
-	{
-		InventoryWidget->SetVisibility(ESlateVisibility::Hidden);
-
-		UWorld* world = GetWorld();
-		if (!world) return;
-		APlayerController* playerController = world->GetFirstPlayerController();
-
-		FInputModeGameOnly inputMode;
-		playerController->SetInputMode(inputMode);
-		playerController->bShowMouseCursor = false;
-	}
-	else if (InvVisibility == ESlateVisibility::Hidden)
-	{
-		InventoryWidget->UpdateInventoryGrid(InventoryComponent);
-		InventoryWidget->SetVisibility(ESlateVisibility::Visible);
-
-		UWorld* world = GetWorld();
-		if (!world) return;
-		APlayerController* playerController = world->GetFirstPlayerController();
-
-		FInputModeUIOnly inputMode;
-		inputMode.SetWidgetToFocus(InventoryWidget->TakeWidget());
-		inputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-
-		playerController->SetInputMode(inputMode);
-		playerController->bShowMouseCursor = true;
-	}
-
+	Widget_PlayerInventory->ShowInventory(InventoryComponent);
 }
 
 void UWidget_Player_HUD::UpdateInventory(UInventoryComponent* InventoryComponent)
 {
-	if(!InventoryWidget)
-		UE_LOG(LogTemp, Display, TEXT("UWidget_Player_HUD: Can't Get UWidget_Inventory Widget."));
-	InventoryWidget->UpdateInventoryGrid(InventoryComponent);
+	if(!Widget_PlayerInventory)
+		UE_LOG(LogTemp, Display, TEXT("UWidget_Player_HUD: Can't Get UWidget_Player_Inventory Widget."));
+	Widget_PlayerInventory->UpdateInventory(InventoryComponent);
 }
