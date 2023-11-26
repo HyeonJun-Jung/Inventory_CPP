@@ -3,6 +3,7 @@
 
 #include "InventoryComponent.h"
 #include "Interface/Interact_Interface.h"
+#include "Actor/Interactable_Actor.h"
 #include "Player_Controller.h"
 #include <Kismet/GameplayStatics.h>
 #include <Kismet/KismetSystemLibrary.h>
@@ -47,9 +48,15 @@ void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	Interact_Trace();
+	if(Enable_Tracing)
+		Interact_Trace();
 }
 
+
+void UInventoryComponent::Set_Traceable(bool Tracing)
+{
+	Enable_Tracing = Tracing;
+}
 
 void UInventoryComponent::Interact_Trace()
 {
@@ -74,14 +81,13 @@ void UInventoryComponent::Interact_Trace()
 		TraceType, false, IgnoreActors,
 		EDrawDebugTrace::ForOneFrame, hitResult, true);
 
-	AInteractable_Item* hitActor = Cast<AInteractable_Item>(hitResult.GetActor());
+	IInteract_Interface* hitActor = Cast<IInteract_Interface>(hitResult.GetActor());
 
 	if (hitActor)
 	{
 		if (!Interacting_Actor)
 		{
 			Interacting_Actor = hitActor;
-			UE_LOG(LogTemp, Warning, TEXT("Iteract Actor : %s"), *hitActor->GetName());
 		}
 		else
 		{
@@ -102,11 +108,13 @@ void UInventoryComponent::Interact()
 {
 	if (Interacting_Actor)
 	{
-		IInteract_Interface* interactable_Actor = Cast<IInteract_Interface>(Interacting_Actor);
+		AInteractable_Actor* interactable_Actor = Cast<AInteractable_Actor>(Interacting_Actor);
 		if (interactable_Actor)
 		{
-			interactable_Actor->Execute_Interact_With(Interacting_Actor, this);
+			interactable_Actor->Execute_Interact_With(interactable_Actor, this);
 		}
+		else
+			UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent : Interacting Actor Is not IInteract_Interface Ref."));
 	}
 }
 
@@ -208,5 +216,5 @@ void UInventoryComponent::UpdateInventory_Multicast_Implementation()
 	APlayer_Controller* controller = Cast< APlayer_Controller>(GetWorld()->GetFirstPlayerController());
 	if (!controller)
 		UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent : Can't Cast to Player_Controller."));
-	controller->UpdateInventory(this);
+	controller->UpdateInventory();
 }

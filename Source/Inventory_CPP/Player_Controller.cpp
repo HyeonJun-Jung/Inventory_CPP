@@ -14,6 +14,8 @@ void APlayer_Controller::BeginPlay()
 {
 	Super::BeginPlay();
 
+	InventoryComponent->Set_Traceable(true);
+
 	FStringClassReference HUDWidgetClassRef(TEXT("/Game/Inventory/Widget/WBP_Player_HUD.WBP_Player_HUD_C"));
 	UClass* HUDWidgetClass = HUDWidgetClassRef.TryLoadClass<UWidget_Player_HUD>();
 	if (!HUDWidgetClass)
@@ -40,12 +42,17 @@ void APlayer_Controller::Tick(float DeltaTime)
 void APlayer_Controller::ShowInventory()
 {
 	if(!InventoryComponent || !HUD) return;
-	HUD->UpdateInventory(InventoryComponent);
 	HUD->ShowInventory(InventoryComponent);
 }
 
-void APlayer_Controller::UpdateInventory(UInventoryComponent* InventoryComp)
+void APlayer_Controller::ShowChestInventory(UInventoryComponent* ChestInventoryComp)
 {
-	if (!InventoryComp || !HUD) return;
-	HUD->UpdateInventory(InventoryComp);
+	if (!InventoryComponent || !HUD) return;
+	HUD->ShowChestInventory(ChestInventoryComp, InventoryComponent);
+}
+
+void APlayer_Controller::UpdateInventory()
+{
+	if (!HUD) return;
+	HUD->UpdateInventory();
 }

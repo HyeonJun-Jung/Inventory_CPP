@@ -41,7 +41,8 @@ public:
 
 public:
 	void ShowInventory();
-	void UpdateInventory(class UInventoryComponent* InventoryComp);
+	void ShowChestInventory(class UInventoryComponent* ChestInventoryComp);
+	void UpdateInventory();
 
 private:
 	class UInventoryComponent* InventoryComponent;

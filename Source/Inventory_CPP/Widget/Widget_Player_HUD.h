@@ -20,12 +20,16 @@ protected:
 
 public:
 	void ShowInventory(class UInventoryComponent* InventoryComponent);
-	void UpdateInventory(class UInventoryComponent* InventoryComponent);
+	void UpdateInventory();
+
+	void ShowChestInventory(class UInventoryComponent* ChestInvComp, class UInventoryComponent* playerInvComp);
 
 	UClass* InventoryWidgetClass;
+	UClass* ChestWidgetClass;
 
 	UPROPERTY(meta = (BindWidget))
 	UCanvasPanel* CanvasPanel;
 
 	class UWidget_Player_Inventory* Widget_PlayerInventory;
+	class UWidget_Chest_Inventory* Widget_ChestInventory;
 };

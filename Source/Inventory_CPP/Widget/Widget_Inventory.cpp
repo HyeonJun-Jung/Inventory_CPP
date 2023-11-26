@@ -10,22 +10,20 @@
 bool UWidget_Inventory::Initialize()
 {
 	Super::Initialize();
-
-	APlayer_Controller* controller = Cast<APlayer_Controller>(GetWorld()->GetFirstPlayerController());
-	if (!controller)
-	{
-		UE_LOG(LogTemp, Display, TEXT("UWidget_Inventory: Can't Cast To APlayer_Controller."));
-		return false;
-	}
 		
-	InvComp = controller->GetInventoryComponent();
+	return true;
+}
+
+void UWidget_Inventory::InitalizeInventoryGrid(UInventoryComponent* InventoryComponent)
+{
+	InvComp = InventoryComponent;
 	if (!InvComp)
 	{
 		UE_LOG(LogTemp, Display, TEXT("UWidget_Inventory: Can't Get Inventory Component."));
-		return false;
+		return;
 	}
 
-	if (!row_1) return false;
+	if (!row_1) return;
 	TArray<UWidget*> Array1 = row_1->GetAllChildren();
 
 	int slotNum = 0;
@@ -34,13 +32,13 @@ bool UWidget_Inventory::Initialize()
 		UWidget_Inventory_Slot* InvSlot = Cast<UWidget_Inventory_Slot>(widget);
 		if (!InvSlot) {
 			UE_LOG(LogTemp, Display, TEXT("UWidget_Inventory: Can't Cast To UWidget_Inventory_Slot."));
-			return false;
+			return;
 		}
 		InvSlot->InitializeSlot(slotNum++, InvComp);
 		InventorySlot_Array.Add(InvSlot);
 	}
 
-	if (!row_2) return false;
+	if (!row_2) return;
 	TArray<UWidget*> Array2 = row_2->GetAllChildren();
 
 	for (UWidget* widget : Array2)
@@ -48,13 +46,13 @@ bool UWidget_Inventory::Initialize()
 		UWidget_Inventory_Slot* InvSlot = Cast<UWidget_Inventory_Slot>(widget);
 		if (!InvSlot) {
 			UE_LOG(LogTemp, Display, TEXT("UWidget_Inventory: Can't Cast To UWidget_Inventory_Slot."));
-			return false;
+			return;
 		}
 		InvSlot->InitializeSlot(slotNum++, InvComp);
 		InventorySlot_Array.Add(InvSlot);
 	}
 
-	if (!row_3) return false;
+	if (!row_3) return;
 	TArray<UWidget*> Array3 = row_3->GetAllChildren();
 
 	for (UWidget* widget : Array3)
@@ -62,13 +60,13 @@ bool UWidget_Inventory::Initialize()
 		UWidget_Inventory_Slot* InvSlot = Cast<UWidget_Inventory_Slot>(widget);
 		if (!InvSlot) {
 			UE_LOG(LogTemp, Display, TEXT("UWidget_Inventory: Can't Cast To UWidget_Inventory_Slot."));
-			return false;
+			return;
 		}
 		InvSlot->InitializeSlot(slotNum++, InvComp);
 		InventorySlot_Array.Add(InvSlot);
 	}
 
-	if (!row_4) return false;
+	if (!row_4) return;
 	TArray<UWidget*> Array4 = row_4->GetAllChildren();
 
 	for (UWidget* widget : Array4)
@@ -76,19 +74,20 @@ bool UWidget_Inventory::Initialize()
 		UWidget_Inventory_Slot* InvSlot = Cast<UWidget_Inventory_Slot>(widget);
 		if (!InvSlot) {
 			UE_LOG(LogTemp, Display, TEXT("UWidget_Inventory: Can't Cast To UWidget_Inventory_Slot."));
-			return false;
+			return;
 		}
 		InvSlot->InitializeSlot(slotNum++, InvComp);
 		InventorySlot_Array.Add(InvSlot);
 	}
 
-	return true;
 }
 
-void UWidget_Inventory::UpdateInventoryGrid(UInventoryComponent* InventoryComponent)
+void UWidget_Inventory::UpdateInventoryGrid()
 {
-	auto Contents = InventoryComponent->GetContents(); int idx = 0;
-	auto ItemDB = InventoryComponent->GetItemDB();
+	if (!InvComp) return;
+
+	auto Contents = InvComp->GetContents(); int idx = 0;
+	auto ItemDB = InvComp->GetItemDB();
 
 	for (FSlotStructure slot : Contents)
 	{

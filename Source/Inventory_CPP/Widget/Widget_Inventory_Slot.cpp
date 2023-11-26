@@ -110,7 +110,6 @@ bool UWidget_Inventory_Slot::NativeOnDrop(const FGeometry& InGeometry, const FDr
 	UInventoryComponent* SourceInv = DragVisualWidget->InvComp;
 	int SourceIdx = DragVisualWidget->SlotIdx;
 
-	
 	InvComp->Transfer_Slot_Server(SourceInv, SourceIdx, SlotIdx);
 
 	return true;

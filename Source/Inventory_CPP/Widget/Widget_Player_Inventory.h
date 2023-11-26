@@ -19,10 +19,12 @@ protected:
 	
 public:
 	void ShowInventory(class UInventoryComponent* InventoryComponent);
-	void UpdateInventory(class UInventoryComponent* InventoryComponent);
+	void UpdateInventory();
+
+	bool Initialized = false;
 
 	UClass* InventoryGridClass;
 
-	UPROPERTY()
-	class UWidget_Inventory* InventoryWidget;
+	UPROPERTY(meta = (BindWidget))
+	class UWidget_Inventory* Player_Inventory_Grid;
 };

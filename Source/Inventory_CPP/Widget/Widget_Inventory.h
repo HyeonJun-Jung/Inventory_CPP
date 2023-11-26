@@ -18,7 +18,8 @@ protected:
 	virtual bool Initialize() override;
 
 public:
-	void UpdateInventoryGrid(class UInventoryComponent* InventoryComponent);
+	void InitalizeInventoryGrid(class UInventoryComponent* InventoryComponent);
+	void UpdateInventoryGrid();
 
 
 public:

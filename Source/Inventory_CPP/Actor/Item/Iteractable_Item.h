@@ -5,11 +5,12 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Interface/Interact_Interface.h"
+#include "Actor/Interactable_Actor.h"
 #include "Structure/SlotStructure.h"
 #include "Iteractable_Item.generated.h"
 
 UCLASS()
-class INVENTORY_CPP_API AInteractable_Item : public AActor, public IInteract_Interface
+class INVENTORY_CPP_API AInteractable_Item : public AInteractable_Actor
 {
 	GENERATED_BODY()
 	

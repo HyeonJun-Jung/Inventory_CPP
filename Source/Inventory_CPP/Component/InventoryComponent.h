@@ -27,6 +27,9 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	// Determine Using Tracing or Not
+	void Set_Traceable(bool Tracing);
+
 	void Interact_Trace();
 
 	void Interact();
@@ -39,8 +42,11 @@ public:
 	UPROPERTY(EditAnywhere)
 	float Interact_Radius = 50;
 
+	UPROPERTY(EditAnywhere)
+	bool Enable_Tracing = false;
+
 private:
-	AInteractable_Item* Interacting_Actor = nullptr;
+	IInteract_Interface* Interacting_Actor = nullptr;
 
 
 public:

@@ -19,7 +19,6 @@ protected:
 
 public:
 	void InitializeSlot(int SlotNum, class UInventoryComponent* InventoryComp);
-
 	void UpdateSlot(FName Name, UTexture2D* Icon, uint8 quantity);
 
 protected:
