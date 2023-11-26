@@ -2,10 +2,11 @@
 
 
 #include "Widget/Widget_Player_HUD.h"
-#include "Component/InventoryComponent.h"
-#include "Widget_Inventory.h"
+#include "Widget/Widget_Inventory.h"
 #include "Widget/Widget_Player_Inventory.h"
 #include "Widget/Widget_Chest_Inventory.h"
+#include "Component/InventoryComponent.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 
 bool UWidget_Player_HUD::Initialize()
 {
@@ -63,6 +64,21 @@ void UWidget_Player_HUD::UpdateInventory()
 
 void UWidget_Player_HUD::ShowChestInventory(UInventoryComponent* ChestInvComp, UInventoryComponent* playerInvComp)
 {
+	if (IsValid(Widget_ChestInventory))
+	{
+		UWidgetLayoutLibrary::RemoveAllWidgets(Widget_ChestInventory);
+		Widget_ChestInventory = nullptr;
+
+		UWorld* world = GetWorld();
+		if (!world) return;
+		APlayerController* playerController = world->GetFirstPlayerController();
+
+		FInputModeGameOnly inputMode;
+		playerController->SetInputMode(inputMode);
+		playerController->bShowMouseCursor = false;
+		return;
+	}
+
 	if (!IsValid(Widget_ChestInventory))
 	{
 		Widget_ChestInventory = CreateWidget<UWidget_Chest_Inventory>(this, ChestWidgetClass);
