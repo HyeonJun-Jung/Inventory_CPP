@@ -89,8 +89,8 @@ public:
 	void Interact();
 
 	UFUNCTION(Server, reliable)
-	void Interact_Server();
-	void Interact_Server_Implementation();
+	void Interact_Server(UInventoryComponent* InvComp);
+	void Interact_Server_Implementation(UInventoryComponent* InvComp);
 	
 };
 

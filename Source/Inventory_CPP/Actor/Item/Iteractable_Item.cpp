@@ -28,7 +28,7 @@ void AInteractable_Item::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("AInteractable_Item : Can't Get DataTable."))
 	}
 	
-	InitItemData_Server();
+	InitItemData();
 }
 
 // Called every frame
@@ -36,6 +36,21 @@ void AInteractable_Item::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
+
+
+void AInteractable_Item::InitItemData()
+{
+	if (IsValid(ItemDB))
+	{
+		FItemStructure* itemData = ItemDB->FindRow<FItemStructure>(Item_ID, Item_ID.ToString());
+		if (itemData)
+		{
+			ItemData_Slot.ID = itemData->ID;
+			ItemData_Slot.Quantity = Item_Quantity;
+		}
+	}
+}
+
 
 void AInteractable_Item::Interact_With_Implementation(UInventoryComponent* InventoryComponent)
 {

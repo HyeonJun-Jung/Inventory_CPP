@@ -24,9 +24,11 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
 public:
 	virtual void Interact_With_Implementation(UInventoryComponent* InventoryComponent) override;
 
+	UPROPERTY(Replicated)
 	UInventoryComponent* Chest_InventoryComponent;
 };

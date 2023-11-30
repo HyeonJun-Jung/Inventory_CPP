@@ -30,9 +30,15 @@ public:
 	// Determine Using Tracing or Not
 	void Set_Traceable(bool Tracing);
 
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
+
 	void Interact_Trace();
 
 	void Interact();
+
+	UFUNCTION(Server, reliable)
+	void Interact_Server();
+	void Interact_Server_Implementation();
 
 
 public:
@@ -60,8 +66,8 @@ public:
 	void Transfer_Slot_Server_Implementation(UInventoryComponent* SourceInv, int SourceIdx, int DestIdx);
 
 	UFUNCTION(NetMulticast, reliable)
-	void UpdateInventory_Multicast();
-	void UpdateInventory_Multicast_Implementation();
+	void UpdateInventory_Multicast(UInventoryComponent* SourceInv, UInventoryComponent* DestInv);
+	void UpdateInventory_Multicast_Implementation(UInventoryComponent* SourceInv, UInventoryComponent* DestInv);
 
 
 private:
@@ -71,6 +77,8 @@ private:
 	UPROPERTY(EditAnywhere)
 	int Inventory_Size = 30;
 
+public:
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
 	TArray<FSlotStructure> Contents;
 
 // Inventory Widget

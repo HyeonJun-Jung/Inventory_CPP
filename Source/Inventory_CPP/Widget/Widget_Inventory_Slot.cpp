@@ -7,6 +7,7 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Component/InventoryComponent.h"
+#include "Player_Controller.h"
 #include <Kismet/KismetTextLibrary.h>
 #include <Blueprint/WidgetBlueprintLibrary.h>
 #include <Engine/DataTable.h>
@@ -88,7 +89,7 @@ void UWidget_Inventory_Slot::NativeOnDragDetected(const FGeometry& InGeometry, c
 	if (!DragVisualClass)
 		UE_LOG(LogTemp, Warning, TEXT("UWidget_Inventory_Slot : Should Set DragVisualClass."));
 
-	UWidget_Inventory_Slot* DragVisualWidget = CreateWidget<UWidget_Inventory_Slot>(GetOwningPlayer(), DragVisualClass);
+	UWidget_Inventory_Slot* DragVisualWidget = CreateWidget<UWidget_Inventory_Slot>(this, DragVisualClass);
 	DragVisualWidget->InvComp = this->InvComp;
 	DragVisualWidget->SlotIdx = this->SlotIdx;
 	DragVisualWidget->Item_Image->SetBrushFromTexture(Item_Texture2D);
@@ -110,7 +111,14 @@ bool UWidget_Inventory_Slot::NativeOnDrop(const FGeometry& InGeometry, const FDr
 	UInventoryComponent* SourceInv = DragVisualWidget->InvComp;
 	int SourceIdx = DragVisualWidget->SlotIdx;
 
-	InvComp->Transfer_Slot_Server(SourceInv, SourceIdx, SlotIdx);
+	//InvComp->Transfer_Slot_Server(SourceInv, SourceIdx, SlotIdx);
 
+	APlayerController* LocalController = GetGameInstance()->GetFirstLocalPlayerController();
+	if (IsValid(LocalController))
+	{
+		APlayer_Controller* controller = Cast<APlayer_Controller>(LocalController);
+		if (IsValid(controller))
+			controller->Transfer_Slot_Server(SourceInv, SourceIdx, InvComp, SlotIdx);
+	}
 	return true;
 }

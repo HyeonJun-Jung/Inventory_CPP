@@ -30,6 +30,8 @@ public:
 public:
 	virtual void Interact_With_Implementation(UInventoryComponent* InventoryComponent) override;
 
+	void InitItemData();
+
 	UFUNCTION(Server, reliable)
 	void InitItemData_Server();
 

@@ -9,6 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Engine/Engine.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AInventory_CPPCharacter
@@ -89,20 +90,29 @@ void AInventory_CPPCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	
+	UE_LOG(LogTemp, Display, TEXT("AInventory_CPPCharacter: %s"), *GetName());
 	Controller = Cast<APlayer_Controller>(GetController());
-	if (!Controller)
+	if (!IsValid(Controller))
 	{
-		UE_LOG(LogTemp, Display, TEXT("AInventory_CPPCharacter: Can't Get APlayer_Controller"));
+		UE_LOG(LogTemp, Display, TEXT("AInventory_CPPCharacter: Can't Cast To APlayer_Controller"));
 		return;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Display, TEXT("AInventory_CPPCharacter: APlayer_Controller : %s"), *Controller->GetName());
 	}
 
 	InventoryComponent = Controller->GetInventoryComponent();
-	if(!InventoryComponent)
+	if (!IsValid(InventoryComponent))
 	{
 		UE_LOG(LogTemp, Display, TEXT("AInventory_CPPCharacter: Can't Get InventoryComponent"));
-		return;
 	}
+	else
+		UE_LOG(LogTemp, Display, TEXT("AInventory_CPPCharacter: Success to Get InventoryComponent"));
+	
 }
+	
 
 void AInventory_CPPCharacter::Tick(float DeltaTime)
 {
@@ -117,14 +127,70 @@ void AInventory_CPPCharacter::Inventory()
 
 void AInventory_CPPCharacter::Interact()
 {
-	Interact_Server();
+	if (IsValid(InventoryComponent))
+		InventoryComponent->Interact_Server();
+	else
+	{
+		if (IsValid(Controller))
+		{
+			InventoryComponent = Controller->GetInventoryComponent();
+			if (IsValid(InventoryComponent))
+				InventoryComponent->Interact_Server();
+			else
+				UE_LOG(LogTemp, Display, TEXT("AInventory_CPPCharacter : InventoryComponent Is Not Valid."));
+		}
+		else
+		{
+			Controller = Cast<APlayer_Controller>(GetController());
+			if (IsValid(Controller))
+			{
+				InventoryComponent = Controller->GetInventoryComponent();
+				if (IsValid(InventoryComponent))
+					InventoryComponent->Interact_Server();
+				else
+					UE_LOG(LogTemp, Display, TEXT("AInventory_CPPCharacter : InventoryComponent Is Not Valid."));
+			}
+			else
+				UE_LOG(LogTemp, Display, TEXT("AInventory_CPPCharacter : Controller Is Not Valid."));
+		}
+	}
+
 }
 
-void AInventory_CPPCharacter::Interact_Server_Implementation()
+void AInventory_CPPCharacter::Interact_Server_Implementation(UInventoryComponent* InvComp)
 {
 	UE_LOG(LogTemp, Display, TEXT("Interact_Server_Implementation HAS BEEN CALLED"));
-	if (InventoryComponent)
+	
+	if (IsValid(InvComp))
+		InvComp->Interact();
+
+	/*if (IsValid(InventoryComponent))
 		InventoryComponent->Interact();
+	else
+	{
+		if (IsValid(Controller))
+		{
+			InventoryComponent = Controller->GetInventoryComponent();
+			if(IsValid(InventoryComponent))
+				InventoryComponent->Interact();
+			else
+				UE_LOG(LogTemp, Display, TEXT("AInventory_CPPCharacter : InventoryComponent Is Not Valid."));
+		}
+		else
+		{
+			Controller = Cast<APlayer_Controller>(GetController());
+			if (IsValid(Controller))
+			{
+				InventoryComponent = Controller->GetInventoryComponent();
+				if (IsValid(InventoryComponent))
+					InventoryComponent->Interact();
+				else
+					UE_LOG(LogTemp, Display, TEXT("AInventory_CPPCharacter : InventoryComponent Is Not Valid."));
+			}
+			else
+				UE_LOG(LogTemp, Display, TEXT("AInventory_CPPCharacter : Controller Is Not Valid."));
+		}
+	}*/
 }
 
 void AInventory_CPPCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)

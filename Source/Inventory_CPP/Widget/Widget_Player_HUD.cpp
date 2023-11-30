@@ -34,10 +34,10 @@ bool UWidget_Player_HUD::Initialize()
 
 void UWidget_Player_HUD::ShowInventory(UInventoryComponent* InventoryComponent)
 {
-	if (!IsValid( Widget_PlayerInventory))
+	if (!IsValid(Widget_PlayerInventory))
 	{
 		Widget_PlayerInventory = CreateWidget<UWidget_Player_Inventory>(this, InventoryWidgetClass);
-		if (!Widget_PlayerInventory)
+		if (!IsValid(Widget_PlayerInventory))
 		{
 			UE_LOG(LogTemp, Display, TEXT("UWidget_Player_HUD: Can't Create UWidget_Player_Inventory Widget."));
 			return;
@@ -46,19 +46,21 @@ void UWidget_Player_HUD::ShowInventory(UInventoryComponent* InventoryComponent)
 		// Widget_PlayerInventory->SetVisibility(ESlateVisibility::Hidden);
 	}
 
-	Widget_PlayerInventory->ShowInventory(InventoryComponent);
+	if (IsValid(Widget_PlayerInventory))
+		Widget_PlayerInventory->ShowInventory(InventoryComponent);
 }
 
-void UWidget_Player_HUD::UpdateInventory()
+void UWidget_Player_HUD::UpdateInventory(UInventoryComponent* SourceInv, UInventoryComponent* DestInv)
 {
 	if (IsValid(Widget_PlayerInventory))
 	{
-		Widget_PlayerInventory->UpdateInventory();
+		if(SourceInv == DestInv)
+			Widget_PlayerInventory->UpdateInventory();
 	}
 
 	if (IsValid(Widget_ChestInventory))
 	{
-		Widget_ChestInventory->Update_ChestInventory();
+		Widget_ChestInventory->Update_ChestInventory(SourceInv, DestInv);
 	}
 }
 
@@ -88,7 +90,6 @@ void UWidget_Player_HUD::ShowChestInventory(UInventoryComponent* ChestInvComp, U
 			return;
 		}
 		Widget_ChestInventory->AddToViewport();
+		Widget_ChestInventory->Show_ChestInventory(ChestInvComp, playerInvComp);
 	}
-
-	Widget_ChestInventory->Show_ChestInventory(ChestInvComp, playerInvComp);
 }

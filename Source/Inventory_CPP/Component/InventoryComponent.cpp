@@ -8,13 +8,14 @@
 #include <Kismet/GameplayStatics.h>
 #include <Kismet/KismetSystemLibrary.h>
 #include <Kismet/KismetMathLibrary.h>
+#include "Net/UnrealNetwork.h"
+
 // Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
 	// ...
 }
 
@@ -23,6 +24,8 @@ UInventoryComponent::UInventoryComponent()
 void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	SetIsReplicated(true);
 
 	UDataTable* BP_ItemDB = LoadObject<UDataTable>(this, TEXT("/Game/Inventory/Data/DB_ItemData.DB_ItemData"));
 	if (IsValid(BP_ItemDB))
@@ -33,7 +36,6 @@ void UInventoryComponent::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent : Can't Get DataTable."))
 	}
-
 	
 	for (int i = 0; i < Inventory_Size; i++)
 	{
@@ -56,6 +58,13 @@ void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 void UInventoryComponent::Set_Traceable(bool Tracing)
 {
 	Enable_Tracing = Tracing;
+}
+
+void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UInventoryComponent, Contents);
 }
 
 void UInventoryComponent::Interact_Trace()
@@ -88,6 +97,8 @@ void UInventoryComponent::Interact_Trace()
 		if (!Interacting_Actor)
 		{
 			Interacting_Actor = hitActor;
+			AInteractable_Actor* interactable_Actor = Cast<AInteractable_Actor>(Interacting_Actor);
+			UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent : Interacting Actor Is %s."), *interactable_Actor->GetName());
 		}
 		else
 		{
@@ -105,6 +116,20 @@ void UInventoryComponent::Interact_Trace()
 }
 
 void UInventoryComponent::Interact()
+{
+	if (Interacting_Actor)
+	{
+		AInteractable_Actor* interactable_Actor = Cast<AInteractable_Actor>(Interacting_Actor);
+		if (interactable_Actor)
+		{
+			interactable_Actor->Execute_Interact_With(interactable_Actor, this);
+		}
+		else
+			UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent : Interacting Actor Is not IInteract_Interface Ref."));
+	}
+}
+
+void UInventoryComponent::Interact_Server_Implementation()
 {
 	if (Interacting_Actor)
 	{
@@ -206,15 +231,15 @@ void UInventoryComponent::Transfer_Slot_Server_Implementation(UInventoryComponen
 		SourceContents[SourceIdx] = LocalSlot;
 	}
 
-	UpdateInventory_Multicast();
-	SourceInv->UpdateInventory_Multicast();
+	UpdateInventory_Multicast(SourceInv, this);
+	// SourceInv->UpdateInventory_Multicast(SourceInv, this);
 }
 
-void UInventoryComponent::UpdateInventory_Multicast_Implementation()
+void UInventoryComponent::UpdateInventory_Multicast_Implementation(UInventoryComponent* SourceInv, UInventoryComponent* DestInv)
 {
 	UE_LOG(LogTemp, Display, TEXT("UInventoryComponent : UpdateInventory_Multicast_Implementation HAS BEEN CALLED."));
-	APlayer_Controller* controller = Cast< APlayer_Controller>(GetWorld()->GetFirstPlayerController());
+	APlayer_Controller* controller = Cast<APlayer_Controller>(GetWorld()->GetFirstPlayerController());
 	if (!controller)
 		UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent : Can't Cast to Player_Controller."));
-	controller->UpdateInventory();
+	controller->UpdateInventory_Client(SourceInv, DestInv);
 }

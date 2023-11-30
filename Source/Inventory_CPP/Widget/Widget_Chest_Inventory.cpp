@@ -4,6 +4,7 @@
 #include "Widget/Widget_Chest_Inventory.h"
 #include "Component/InventoryComponent.h"
 #include "Widget_Inventory.h"
+#include "Net/UnrealNetwork.h"
 
 bool UWidget_Chest_Inventory::Initialize()
 {
@@ -11,6 +12,7 @@ bool UWidget_Chest_Inventory::Initialize()
 
 	return true;
 }
+
 
 void UWidget_Chest_Inventory::Show_ChestInventory(UInventoryComponent* Chest_Inventory, UInventoryComponent* Player_Inventory)
 {
@@ -64,7 +66,7 @@ void UWidget_Chest_Inventory::Show_ChestInventory(UInventoryComponent* Chest_Inv
 	}
 }
 
-void UWidget_Chest_Inventory::Update_ChestInventory()
+void UWidget_Chest_Inventory::Update_ChestInventory(UInventoryComponent* SourceInv, UInventoryComponent* DestInv)
 {
 	Player_Inventory_Grid->UpdateInventoryGrid();
 	Chest_Inventory_Grid->UpdateInventoryGrid();

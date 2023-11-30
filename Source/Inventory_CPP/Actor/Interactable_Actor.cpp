@@ -28,4 +28,3 @@ void AInteractable_Actor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
-

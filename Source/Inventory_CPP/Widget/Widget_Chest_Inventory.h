@@ -19,16 +19,17 @@ protected:
 
 public:
 	void Show_ChestInventory(class UInventoryComponent* Chest_Inventory, class UInventoryComponent* Player_Inventory);
-	void Update_ChestInventory();
+	void Update_ChestInventory(class UInventoryComponent* SourceInv, class UInventoryComponent* DestInv);
 
 public:
 	bool Initialized = false;
+
 	class UInventoryComponent* Player_Inv_Comp;
 	class UInventoryComponent* Chest_Inv_Comp;
 
 	UPROPERTY(meta = (BindWidget))
-		class UWidget_Inventory* Player_Inventory_Grid;
+	class UWidget_Inventory* Player_Inventory_Grid;
 
 	UPROPERTY(meta = (BindWidget))
-		class UWidget_Inventory* Chest_Inventory_Grid;
+	class UWidget_Inventory* Chest_Inventory_Grid;
 };
