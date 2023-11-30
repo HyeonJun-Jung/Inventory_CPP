@@ -2,6 +2,7 @@
 
 
 #include "Widget/Widget_Inventory_Slot.h"
+#include "Widget/Widget_ActionBar.h"
 #include "Widget/SlotDragDrop.h"
 #include "Components/Image.h"
 #include "Components/Button.h"
@@ -25,6 +26,9 @@ bool UWidget_Inventory_Slot::Initialize()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent : Can't Get DataTable."))
 	}
+
+	FStringClassReference ChestWidgetClassRef(TEXT("/Game/Inventory/Widget/WBP_ActionBar.WBP_ActionBar_C"));
+	ActionBar_WidgetClass = ChestWidgetClassRef.TryLoadClass<UWidget_ActionBar>();
 
 	return true;
 }
@@ -75,6 +79,16 @@ FReply UWidget_Inventory_Slot::NativeOnMouseButtonDown(const FGeometry& InGeomet
 	return Reply.NativeReply;
 }
 
+FReply UWidget_Inventory_Slot::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	UE_LOG(LogTemp, Warning, TEXT("UWidget_Inventory_Slot : NativeOnMouseButtonUp HAS BEEN CALLED."));
+
+	FEventReply Reply;
+	Reply.NativeReply = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+
+	return Reply.NativeReply;
+}
+
 void UWidget_Inventory_Slot::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
 {
 	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
@@ -120,5 +134,39 @@ bool UWidget_Inventory_Slot::NativeOnDrop(const FGeometry& InGeometry, const FDr
 		if (IsValid(controller))
 			controller->Transfer_Slot_Server(SourceInv, SourceIdx, InvComp, SlotIdx);
 	}
+
 	return true;
+}
+
+FEventReply UWidget_Inventory_Slot::RedirectMouseDownToWidget(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	UE_LOG(LogTemp, Warning, TEXT("UWidget_Inventory_Slot : NativeOnMouseButtonDown HAS BEEN CALLED."));
+
+	FEventReply Reply;
+	Reply.NativeReply = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+	if (InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton) == true)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UWidget_Inventory_Slot : SlotIdx Is %d."), SlotIdx);
+		if (!Item_Name.IsEqual(FName("None")))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("UWidget_Inventory_Slot : ItemID Is %s."), *Item_Name.ToString());
+			Reply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);
+		}
+	}
+	else if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton) == true)
+	{
+		if (!Item_Name.IsEqual(FName("None")))
+		{
+			if (IsValid(ActionBar_WidgetClass))
+			{
+				 UWidget_ActionBar* actionBar = CreateWidget<UWidget_ActionBar>(this, ActionBar_WidgetClass);
+				 actionBar->InitializeActionBar(InvComp, SlotIdx);
+				 actionBar->AddToViewport();
+			}
+			else
+				UE_LOG(LogTemp, Warning, TEXT("UWidget_Inventory_Slot : Failed to Craete ActionBar."), SlotIdx);
+		}
+	}
+
+	return Reply;
 }

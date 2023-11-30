@@ -35,4 +35,5 @@ public:
 
 	UPROPERTY()
 	class UWidget_Chest_Inventory* Widget_ChestInventory;
+
 };

@@ -23,10 +23,14 @@ public:
 
 protected:
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 
-
+	// Redirect On Preview Mouse Button Down in Blueprint 
+	// If On Preview Mouse Button Down is Called in Blueprint, NativeOnMouseButtonDown is not called.
+	UFUNCTION(BlueprintCallable)
+	FEventReply RedirectMouseDownToWidget(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent);
 
 public:
 	class UInventoryComponent* InvComp;
@@ -36,10 +40,10 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	class UImage* Item_Image;
-	
+
 	UPROPERTY(meta = (BindWidget))
 	class UButton* ItemSlot_Button;
-
+	
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* Item_Quantity;
 
@@ -50,4 +54,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf< UWidget_Inventory_Slot> DragVisualClass;
+
+	UClass* ActionBar_WidgetClass;
 };
