@@ -64,8 +64,6 @@ private:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
 	class UInventoryComponent* InventoryComponent;
 
-	// For Client Replication Delay
-	// Could It be replaced by RepNotify?
 	bool ShouldUpdateInventory = false;
 	float TimeCountForUpdate = 0.f;
 	

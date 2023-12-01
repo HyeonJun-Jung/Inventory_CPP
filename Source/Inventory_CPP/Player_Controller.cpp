@@ -43,9 +43,14 @@ void APlayer_Controller::Tick(float DeltaTime)
 
 	if (ShouldUpdateInventory)
 	{
-		if(IsValid(HUD))
-			HUD->UpdateInventory();
-		ShouldUpdateInventory = false;
+		TimeCountForUpdate += DeltaTime;
+		if (TimeCountForUpdate >= 0.1)
+		{
+			if (IsValid(HUD))
+				HUD->UpdateInventory();
+			TimeCountForUpdate = 0.f;
+			ShouldUpdateInventory = false;
+		}
 	}
 }
 

@@ -22,13 +22,16 @@ AChest::AChest()
 void AChest::BeginPlay()
 {
 	Super::BeginPlay();
-
-	APlayerController* controller = GetGameInstance()->GetFirstLocalPlayerController();
-
-	if (IsValid(controller))
+	UGameInstance* GameInstance = GetGameInstance();
+	if (IsValid(GameInstance))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AChest : Success to Get FirstPlayerController : %s."), *controller->GetName());
-		SetOwner(controller);
+		APlayerController* controller = GameInstance->GetFirstLocalPlayerController();
+
+		if (IsValid(controller))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("AChest : Success to Get FirstPlayerController : %s."), *controller->GetName());
+			SetOwner(controller);
+		}
 	}
 }
 
