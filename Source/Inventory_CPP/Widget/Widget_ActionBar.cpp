@@ -23,14 +23,6 @@ void UWidget_ActionBar::NativeConstruct()
 	Button_Use->OnClicked.AddUniqueDynamic(this, &UWidget_ActionBar::Use);
 	Button_Throw->OnClicked.AddUniqueDynamic(this, &UWidget_ActionBar::Throw);
 	Button_Close->OnClicked.AddUniqueDynamic(this, &UWidget_ActionBar::Close);
-
-	FVector2D MousePosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(this);
-	// UCanvasPanelSlot* BoxAsSlot = Cast<UCanvasPanelSlot>(Box_ActionBar->Slot);
-	 UCanvasPanelSlot* BoxAsSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(Box_ActionBar); 
-	if (IsValid(BoxAsSlot))
-		BoxAsSlot->SetPosition(MousePosition);
-	else
-		UE_LOG(LogTemp, Warning, TEXT("UWidget_ActionBar : Failed to SlotAsCanvasSlot."));
 }
 
 void UWidget_ActionBar::Use()
@@ -40,6 +32,8 @@ void UWidget_ActionBar::Use()
 		UE_LOG(LogTemp, Warning, TEXT("UWidget_ActionBar : Not Initialized."));
 		return;
 	}
+
+	Inventory->RemoveItem_Server(SlotIdx, true, 1);
 }
 
 void UWidget_ActionBar::Throw()
@@ -49,6 +43,8 @@ void UWidget_ActionBar::Throw()
 		UE_LOG(LogTemp, Warning, TEXT("UWidget_ActionBar : Not Initialized."));
 		return;
 	}
+
+	Inventory->RemoveItem_Server(SlotIdx, false, 1);
 }
 
 void UWidget_ActionBar::Close()

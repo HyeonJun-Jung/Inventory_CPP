@@ -50,17 +50,16 @@ void UWidget_Player_HUD::ShowInventory(UInventoryComponent* InventoryComponent)
 		Widget_PlayerInventory->ShowInventory(InventoryComponent);
 }
 
-void UWidget_Player_HUD::UpdateInventory(UInventoryComponent* SourceInv, UInventoryComponent* DestInv)
+void UWidget_Player_HUD::UpdateInventory()
 {
 	if (IsValid(Widget_PlayerInventory))
 	{
-		if(SourceInv == DestInv)
-			Widget_PlayerInventory->UpdateInventory();
+		Widget_PlayerInventory->UpdateInventory();
 	}
 
 	if (IsValid(Widget_ChestInventory))
 	{
-		Widget_ChestInventory->Update_ChestInventory(SourceInv, DestInv);
+		Widget_ChestInventory->Update_ChestInventory();
 	}
 }
 

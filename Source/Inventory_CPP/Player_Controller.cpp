@@ -40,6 +40,13 @@ void APlayer_Controller::BeginPlay()
 void APlayer_Controller::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (ShouldUpdateInventory)
+	{
+		if(IsValid(HUD))
+			HUD->UpdateInventory();
+		ShouldUpdateInventory = false;
+	}
 }
 
 void APlayer_Controller::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -110,8 +117,8 @@ void APlayer_Controller::Transfer_Slot_Server_Implementation(UInventoryComponent
 		SourceContents[SourceIdx] = LocalSlot;
 	}
 
-	DestInv->UpdateInventory_Multicast(SourceInv, DestInv);
-	SourceInv->UpdateInventory_Multicast(SourceInv, DestInv);
+	DestInv->UpdateInventory_Multicast();
+	SourceInv->UpdateInventory_Multicast();
 
 	// UpdateInventory_Multicast_Implementation(SourceInv, DestInv);
 }
@@ -122,13 +129,16 @@ void APlayer_Controller::ShowChestInventory_Client_Implementation(UInventoryComp
 	HUD->ShowChestInventory(ChestInventoryComp, InventoryComponent);
 }
 
-void APlayer_Controller::UpdateInventory_Multicast_Implementation(UInventoryComponent* SourceInv, UInventoryComponent* DestInv)
-{
-	UpdateInventory_Client(SourceInv, DestInv);
-}
-
-void APlayer_Controller::UpdateInventory_Client_Implementation(UInventoryComponent* SourceInv, UInventoryComponent* DestInv)
+void APlayer_Controller::UpdateInventory_Client_Implementation()
 {
 	if (!HUD) return;
-	HUD->UpdateInventory(SourceInv, DestInv);
+	ShouldUpdateInventory = true;
+	HUD->UpdateInventory();
+}
+
+void APlayer_Controller::InventoryUpdate()
+{
+	if (!HUD) return;
+	ShouldUpdateInventory = true;
+	HUD->UpdateInventory();
 }

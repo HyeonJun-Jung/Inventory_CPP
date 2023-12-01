@@ -20,7 +20,7 @@ protected:
 
 public:
 	void ShowInventory(class UInventoryComponent* InventoryComponent);
-	void UpdateInventory(class UInventoryComponent* SourceInv, class UInventoryComponent* DestInv);
+	void UpdateInventory();
 
 	void ShowChestInventory(class UInventoryComponent* ChestInvComp, class UInventoryComponent* playerInvComp);
 

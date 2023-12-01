@@ -49,20 +49,21 @@ public:
 	void Transfer_Slot_Server(UInventoryComponent* SourceInv, int SourceIdx, UInventoryComponent* DestInv, int DestIdx);
 	void Transfer_Slot_Server_Implementation(UInventoryComponent* SourceInv, int SourceIdx, UInventoryComponent* DestInv, int DestIdx);
 
-	UFUNCTION(NetMulticast, reliable)
-	void UpdateInventory_Multicast(UInventoryComponent* SourceInv, UInventoryComponent* DestInv);
-	void UpdateInventory_Multicast_Implementation(UInventoryComponent* SourceInv, UInventoryComponent* DestInv);
-
 	UFUNCTION(client, Reliable)
 	void ShowChestInventory_Client(class UInventoryComponent* ChestInventoryComp);
 	void ShowChestInventory_Client_Implementation(class UInventoryComponent* ChestInventoryComp);
 
 	UFUNCTION(client, Reliable)
-	void UpdateInventory_Client(UInventoryComponent* SourceInv, UInventoryComponent* DestInv);
-	void UpdateInventory_Client_Implementation(UInventoryComponent* SourceInv, UInventoryComponent* DestInv);
+	void UpdateInventory_Client();
+	void UpdateInventory_Client_Implementation();
+
+	UFUNCTION()
+	void InventoryUpdate();
 
 private:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
 	class UInventoryComponent* InventoryComponent;
+
+	bool ShouldUpdateInventory = false;
 	
 };

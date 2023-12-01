@@ -186,6 +186,46 @@ void UInventoryComponent::AddToInventory(FSlotStructure ItemSlot)
 	}
 }
 
+void UInventoryComponent::RemoveItem_Server_Implementation(int SlotIndex, bool Consumed, int Quantity)
+{
+	if (Consumed)
+	{
+		Contents[SlotIndex].Quantity -= Quantity;
+	}
+	else
+	{
+		FItemStructure* itemData = ItemDB->FindRow<FItemStructure>(Contents[SlotIndex].ID, Contents[SlotIndex].ID.ToString());
+		if (!itemData)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent : Can't find Item ID <%s> From Contents."), *Contents[SlotIndex].ID.ToString());
+			return;
+		}
+
+		Contents[SlotIndex].Quantity -= Quantity;
+		if (IsValid(itemData->ItemClass))
+		{
+			APlayerController* controller = Cast<APlayerController>(GetOwner());
+			if (IsValid(controller))
+			{
+				APawn* pawn = controller->GetPawn();
+				FVector location = pawn->GetActorLocation();
+				location += GetOwner()->GetActorForwardVector() * 100;
+				GetWorld()->SpawnActor<AActor>(itemData->ItemClass.Get(), location, FRotator::ZeroRotator);
+			}
+			else
+			{
+				FVector location = GetOwner()->GetActorLocation();
+				location += GetOwner()->GetActorForwardVector() * 100;
+				GetWorld()->SpawnActor<AActor>(itemData->ItemClass.Get(), location, FRotator::ZeroRotator);
+			}		
+		}
+		else
+			UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent : ItemClass is not valid."));
+	}
+
+	UpdateInventory_Multicast();
+}
+
 void UInventoryComponent::Transfer_Slot_Server_Implementation(UInventoryComponent* SourceInv, int SourceIdx, int DestIdx)
 {
 	TArray<FSlotStructure>& SourceContents = SourceInv->GetContents();
@@ -231,15 +271,15 @@ void UInventoryComponent::Transfer_Slot_Server_Implementation(UInventoryComponen
 		SourceContents[SourceIdx] = LocalSlot;
 	}
 
-	UpdateInventory_Multicast(SourceInv, this);
+	UpdateInventory_Multicast();
 	// SourceInv->UpdateInventory_Multicast(SourceInv, this);
 }
 
-void UInventoryComponent::UpdateInventory_Multicast_Implementation(UInventoryComponent* SourceInv, UInventoryComponent* DestInv)
+void UInventoryComponent::UpdateInventory_Multicast_Implementation()
 {
 	UE_LOG(LogTemp, Display, TEXT("UInventoryComponent : UpdateInventory_Multicast_Implementation HAS BEEN CALLED."));
 	APlayer_Controller* controller = Cast<APlayer_Controller>(GetWorld()->GetFirstPlayerController());
 	if (!controller)
 		UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent : Can't Cast to Player_Controller."));
-	controller->UpdateInventory_Client(SourceInv, DestInv);
+	controller->InventoryUpdate();
 }

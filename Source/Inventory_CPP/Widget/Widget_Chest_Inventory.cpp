@@ -66,7 +66,7 @@ void UWidget_Chest_Inventory::Show_ChestInventory(UInventoryComponent* Chest_Inv
 	}
 }
 
-void UWidget_Chest_Inventory::Update_ChestInventory(UInventoryComponent* SourceInv, UInventoryComponent* DestInv)
+void UWidget_Chest_Inventory::Update_ChestInventory()
 {
 	Player_Inventory_Grid->UpdateInventoryGrid();
 	Chest_Inventory_Grid->UpdateInventoryGrid();

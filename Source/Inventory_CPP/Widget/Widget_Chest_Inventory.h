@@ -19,7 +19,7 @@ protected:
 
 public:
 	void Show_ChestInventory(class UInventoryComponent* Chest_Inventory, class UInventoryComponent* Player_Inventory);
-	void Update_ChestInventory(class UInventoryComponent* SourceInv, class UInventoryComponent* DestInv);
+	void Update_ChestInventory();
 
 public:
 	bool Initialized = false;

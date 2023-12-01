@@ -62,12 +62,16 @@ public:
 	void AddToInventory(FSlotStructure ItemSlot);
 	
 	UFUNCTION(Server, reliable)
+	void RemoveItem_Server(int SlotIndex, bool Consumed, int Quantity);
+	void RemoveItem_Server_Implementation(int SlotIndex, bool Consumed, int Quantity);
+
+	UFUNCTION(Server, reliable)
 	void Transfer_Slot_Server(UInventoryComponent* SourceInv, int SourceIdx, int DestIdx);
 	void Transfer_Slot_Server_Implementation(UInventoryComponent* SourceInv, int SourceIdx, int DestIdx);
 
 	UFUNCTION(NetMulticast, reliable)
-	void UpdateInventory_Multicast(UInventoryComponent* SourceInv, UInventoryComponent* DestInv);
-	void UpdateInventory_Multicast_Implementation(UInventoryComponent* SourceInv, UInventoryComponent* DestInv);
+	void UpdateInventory_Multicast();
+	void UpdateInventory_Multicast_Implementation();
 
 
 private:

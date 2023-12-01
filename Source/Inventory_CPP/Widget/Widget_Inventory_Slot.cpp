@@ -11,6 +11,7 @@
 #include "Player_Controller.h"
 #include <Kismet/KismetTextLibrary.h>
 #include <Blueprint/WidgetBlueprintLibrary.h>
+#include <Blueprint/WidgetLayoutLibrary.h>
 #include <Engine/DataTable.h>
 
 bool UWidget_Inventory_Slot::Initialize()
@@ -162,6 +163,9 @@ FEventReply UWidget_Inventory_Slot::RedirectMouseDownToWidget(const FGeometry& I
 				 UWidget_ActionBar* actionBar = CreateWidget<UWidget_ActionBar>(this, ActionBar_WidgetClass);
 				 actionBar->InitializeActionBar(InvComp, SlotIdx);
 				 actionBar->AddToViewport();
+
+				 FVector2D MousePosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(this);
+				 actionBar->SetPositionInViewport(MousePosition);
 			}
 			else
 				UE_LOG(LogTemp, Warning, TEXT("UWidget_Inventory_Slot : Failed to Craete ActionBar."), SlotIdx);
