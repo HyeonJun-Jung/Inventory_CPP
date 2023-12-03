@@ -16,10 +16,15 @@ class INVENTORY_CPP_API UWidget_Player_Inventory : public UUserWidget
 
 protected:
 	virtual bool Initialize() override;
+
 	
 public:
+	virtual void NativeConstruct() override;
 	void ShowInventory(class UInventoryComponent* InventoryComponent);
 	void UpdateInventory();
+	
+	UFUNCTION()
+	void Exit();
 
 	bool Initialized = false;
 
@@ -27,4 +32,7 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	class UWidget_Inventory* Player_Inventory_Grid;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* Button_Exit;
 };

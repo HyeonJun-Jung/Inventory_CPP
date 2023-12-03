@@ -21,49 +21,17 @@ void UWidget_Chest_Inventory::Show_ChestInventory(UInventoryComponent* Chest_Inv
 		UE_LOG(LogTemp, Display, TEXT("UWidget_Chest_Inventory: Initialized."));
 		Player_Inv_Comp = Player_Inventory;
 		Player_Inventory_Grid->InitalizeInventoryGrid(Player_Inv_Comp);
-		Player_Inventory_Grid->SetVisibility(ESlateVisibility::Hidden);
+		Player_Inventory_Grid->SetVisibility(ESlateVisibility::Visible);
 
 		Chest_Inv_Comp = Chest_Inventory;
 		Chest_Inventory_Grid->InitalizeInventoryGrid(Chest_Inv_Comp);
-		Chest_Inventory_Grid->SetVisibility(ESlateVisibility::Hidden);
+		Chest_Inventory_Grid->SetVisibility(ESlateVisibility::Visible);
 
 		Initialized = true;
 	}
 
-	ESlateVisibility InvVisibility = Chest_Inventory_Grid->GetVisibility();
-
-	if (InvVisibility == ESlateVisibility::Visible)
-	{
-		Player_Inventory_Grid->SetVisibility(ESlateVisibility::Hidden);
-		Chest_Inventory_Grid->SetVisibility(ESlateVisibility::Hidden);
-
-		UWorld* world = GetWorld();
-		if (!world) return;
-		APlayerController* playerController = world->GetFirstPlayerController();
-
-		FInputModeGameOnly inputMode;
-		playerController->SetInputMode(inputMode);
-		playerController->bShowMouseCursor = false;
-	}
-	else if (InvVisibility == ESlateVisibility::Hidden)
-	{
-		Player_Inventory_Grid->UpdateInventoryGrid();
-		Player_Inventory_Grid->SetVisibility(ESlateVisibility::Visible);
-
-		Chest_Inventory_Grid->UpdateInventoryGrid();
-		Chest_Inventory_Grid->SetVisibility(ESlateVisibility::Visible);
-
-		UWorld* world = GetWorld();
-		if (!world) return;
-		APlayerController* playerController = world->GetFirstPlayerController();
-
-		FInputModeGameAndUI inputMode;
-		inputMode.SetWidgetToFocus(TakeWidget());
-		inputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-
-		playerController->SetInputMode(inputMode);
-		playerController->bShowMouseCursor = true;
-	}
+	Player_Inventory_Grid->UpdateInventoryGrid(Player_Inventory);
+	Chest_Inventory_Grid->UpdateInventoryGrid(Chest_Inventory);
 }
 
 void UWidget_Chest_Inventory::Update_ChestInventory()

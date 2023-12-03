@@ -20,6 +20,7 @@ protected:
 public:
 	void InitializeSlot(int SlotNum, class UInventoryComponent* InventoryComp);
 	void UpdateSlot(FName Name, UTexture2D* Icon, uint8 quantity);
+	void UpdateSlot(class UInventoryComponent* InventoryComp) { InvComp = InventoryComp; }
 
 protected:
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;

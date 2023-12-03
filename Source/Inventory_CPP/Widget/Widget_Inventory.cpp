@@ -82,6 +82,19 @@ void UWidget_Inventory::InitalizeInventoryGrid(UInventoryComponent* InventoryCom
 
 }
 
+void UWidget_Inventory::UpdateInventoryGrid(UInventoryComponent* InventoryComponent)
+{
+	if (!InvComp) return;
+
+	if (InvComp != InventoryComponent)
+	{
+		InvComp = InventoryComponent;
+		UpdateSlots(InventoryComponent);
+	}
+
+	UpdateInventoryGrid();
+}
+
 void UWidget_Inventory::UpdateInventoryGrid()
 {
 	if (!InvComp) return;
@@ -91,7 +104,7 @@ void UWidget_Inventory::UpdateInventoryGrid()
 
 	for (FSlotStructure slot : Contents)
 	{
-		if(!slot.ID.IsEqual(FName("Empty")))
+		if (!slot.ID.IsEqual(FName("Empty")))
 			UE_LOG(LogTemp, Display, TEXT("UWidget_Inventory: <UpdateInventoryGrid> Item ID  %s."), *slot.ID.ToString());
 
 		auto Item = ItemDB->FindRow<FItemStructure>(slot.ID, slot.ID.ToString());
@@ -103,5 +116,13 @@ void UWidget_Inventory::UpdateInventoryGrid()
 		{
 			InventorySlot_Array[idx++]->UpdateSlot(Item->Name, Item->Icon, slot.Quantity);
 		}
+	}
+}
+
+void UWidget_Inventory::UpdateSlots(UInventoryComponent* InventoryComponent)
+{
+	for (UWidget_Inventory_Slot* slot : InventorySlot_Array)
+	{
+		slot->UpdateSlot(InventoryComponent);
 	}
 }

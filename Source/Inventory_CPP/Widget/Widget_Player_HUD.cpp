@@ -34,30 +34,61 @@ bool UWidget_Player_HUD::Initialize()
 
 void UWidget_Player_HUD::ShowInventory(UInventoryComponent* InventoryComponent)
 {
+	UWorld* world = GetWorld();
+	if (!IsValid(world)) return;
+	APlayerController* playerController = world->GetFirstPlayerController();
+
+	if (!IsValid(playerController)) return;
+
 	if (!IsValid(Widget_PlayerInventory))
 	{
-		Widget_PlayerInventory = CreateWidget<UWidget_Player_Inventory>(this, InventoryWidgetClass);
+		Widget_PlayerInventory = CreateWidget<UWidget_Player_Inventory>(playerController, InventoryWidgetClass);
 		if (!IsValid(Widget_PlayerInventory))
 		{
 			UE_LOG(LogTemp, Display, TEXT("UWidget_Player_HUD: Can't Create UWidget_Player_Inventory Widget."));
 			return;
 		}
 		Widget_PlayerInventory->AddToViewport();
+		Widget_PlayerInventory->ShowInventory(InventoryComponent);
 		// Widget_PlayerInventory->SetVisibility(ESlateVisibility::Hidden);
+		return;
 	}
 
 	if (IsValid(Widget_PlayerInventory))
-		Widget_PlayerInventory->ShowInventory(InventoryComponent);
+	{
+		if (Widget_PlayerInventory->IsInViewport())
+		{
+			Widget_PlayerInventory->RemoveFromParent();
+			// Widget_PlayerInventory = nullptr;
+			FInputModeGameOnly inputMode;
+			playerController->SetInputMode(inputMode);
+			playerController->bShowMouseCursor = false;
+		}
+		else
+		{
+			Widget_PlayerInventory->AddToViewport();
+			Widget_PlayerInventory->ShowInventory(InventoryComponent);
+
+			FInputModeGameAndUI inputMode;
+			inputMode.SetWidgetToFocus(Widget_PlayerInventory->TakeWidget());
+			inputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+
+			playerController->SetInputMode(inputMode);
+			playerController->bShowMouseCursor = true;
+		}	
+		return;
+	}
+		
 }
 
 void UWidget_Player_HUD::UpdateInventory()
 {
-	if (IsValid(Widget_PlayerInventory))
+	if (IsValid(Widget_PlayerInventory) && Widget_PlayerInventory->IsInViewport())
 	{
 		Widget_PlayerInventory->UpdateInventory();
 	}
 
-	if (IsValid(Widget_ChestInventory))
+	if (IsValid(Widget_ChestInventory) && Widget_ChestInventory->IsInViewport())
 	{
 		Widget_ChestInventory->Update_ChestInventory();
 	}
@@ -65,24 +96,41 @@ void UWidget_Player_HUD::UpdateInventory()
 
 void UWidget_Player_HUD::ShowChestInventory(UInventoryComponent* ChestInvComp, UInventoryComponent* playerInvComp)
 {
+	UWorld* world = GetWorld();
+	if (!world) return;
+	APlayerController* playerController = world->GetFirstPlayerController();
+
+	if (!IsValid(playerController)) return;
+
 	if (IsValid(Widget_ChestInventory))
 	{
-		UWidgetLayoutLibrary::RemoveAllWidgets(Widget_ChestInventory);
-		Widget_ChestInventory = nullptr;
+		if (Widget_ChestInventory->IsInViewport())
+		{
+			Widget_ChestInventory->RemoveFromParent();
+			// Widget_PlayerInventory = nullptr;
+			FInputModeGameOnly inputMode;
+			playerController->SetInputMode(inputMode);
+			playerController->bShowMouseCursor = false;
+		}
+		else
+		{
+			Widget_ChestInventory->AddToViewport();
+			Widget_ChestInventory->Show_ChestInventory(ChestInvComp, playerInvComp);
 
-		UWorld* world = GetWorld();
-		if (!world) return;
-		APlayerController* playerController = world->GetFirstPlayerController();
+			FInputModeGameAndUI inputMode;
+			inputMode.SetWidgetToFocus(Widget_ChestInventory->TakeWidget());
+			inputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 
-		FInputModeGameOnly inputMode;
-		playerController->SetInputMode(inputMode);
-		playerController->bShowMouseCursor = false;
+			playerController->SetInputMode(inputMode);
+			playerController->bShowMouseCursor = true;
+		}
+
 		return;
 	}
 
 	if (!IsValid(Widget_ChestInventory))
 	{
-		Widget_ChestInventory = CreateWidget<UWidget_Chest_Inventory>(this, ChestWidgetClass);
+		Widget_ChestInventory = CreateWidget<UWidget_Chest_Inventory>(playerController, ChestWidgetClass);
 		if (!IsValid(Widget_ChestInventory))
 		{
 			UE_LOG(LogTemp, Display, TEXT("UWidget_Player_HUD: Can't Create UWidget_Chest_Inventory Widget."));

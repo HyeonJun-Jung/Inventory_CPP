@@ -2,6 +2,7 @@
 
 
 #include "Widget/Widget_Player_Inventory.h"
+#include "Components/Button.h"
 #include "Component/InventoryComponent.h"
 #include "Widget_Inventory.h"
 
@@ -20,48 +21,41 @@ bool UWidget_Player_Inventory::Initialize()
     return true;
 }
 
+void UWidget_Player_Inventory::NativeConstruct()
+{
+	Super::NativeConstruct();
+	Button_Exit->OnClicked.AddUniqueDynamic(this, &UWidget_Player_Inventory::Exit);
+}
+
 void UWidget_Player_Inventory::ShowInventory(UInventoryComponent* InventoryComponent)
 {
 	if (!Initialized)
 	{
 		Player_Inventory_Grid->InitalizeInventoryGrid(InventoryComponent);
-		Player_Inventory_Grid->SetVisibility(ESlateVisibility::Hidden);
+		Player_Inventory_Grid->SetVisibility(ESlateVisibility::Visible);
 		Initialized = true;
 	}
 
-	ESlateVisibility InvVisibility = Player_Inventory_Grid->GetVisibility();
-
-	if (InvVisibility == ESlateVisibility::Visible)
-	{
-		Player_Inventory_Grid->SetVisibility(ESlateVisibility::Hidden);
-
-		UWorld* world = GetWorld();
-		if (!world) return;
-		APlayerController* playerController = world->GetFirstPlayerController();
-
-		FInputModeGameOnly inputMode;
-		playerController->SetInputMode(inputMode);
-		playerController->bShowMouseCursor = false;
-	}
-	else if (InvVisibility == ESlateVisibility::Hidden)
-	{
-		Player_Inventory_Grid->UpdateInventoryGrid();
-		Player_Inventory_Grid->SetVisibility(ESlateVisibility::Visible);
-
-		UWorld* world = GetWorld();
-		if (!world) return;
-		APlayerController* playerController = world->GetFirstPlayerController();
-
-		FInputModeGameAndUI inputMode;
-		inputMode.SetWidgetToFocus(Player_Inventory_Grid->TakeWidget());
-		inputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-
-		playerController->SetInputMode(inputMode);
-		playerController->bShowMouseCursor = true;
-	}
+	Player_Inventory_Grid->UpdateInventoryGrid();
 }
 
 void UWidget_Player_Inventory::UpdateInventory()
 {
 	Player_Inventory_Grid->UpdateInventoryGrid();
 }
+
+void UWidget_Player_Inventory::Exit()
+{
+	UWorld* world = GetWorld();
+	if (!world) return;
+	APlayerController* playerController = world->GetFirstPlayerController();
+
+	if (!IsValid(playerController)) return;
+
+	FInputModeGameOnly inputMode;
+	playerController->SetInputMode(inputMode);
+	playerController->bShowMouseCursor = false;
+
+	RemoveFromParent();
+}
+

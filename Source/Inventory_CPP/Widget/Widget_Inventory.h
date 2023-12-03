@@ -19,7 +19,9 @@ protected:
 
 public:
 	void InitalizeInventoryGrid(class UInventoryComponent* InventoryComponent);
+	void UpdateInventoryGrid(class UInventoryComponent* InventoryComponent);
 	void UpdateInventoryGrid();
+	void UpdateSlots(class UInventoryComponent* InventoryComponent);
 
 
 public:
