@@ -114,7 +114,7 @@ void UWidget_Inventory::UpdateInventoryGrid()
 
 		if (idx < InventorySlot_Array.Num())
 		{
-			InventorySlot_Array[idx++]->UpdateSlot(Item->Name, Item->Icon, slot.Quantity);
+			InventorySlot_Array[idx++]->UpdateSlot(Item->Name, Item->Category, Item->Icon, slot.Quantity);
 		}
 	}
 }

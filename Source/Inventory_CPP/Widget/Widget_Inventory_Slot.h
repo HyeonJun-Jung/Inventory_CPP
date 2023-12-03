@@ -19,7 +19,7 @@ protected:
 
 public:
 	void InitializeSlot(int SlotNum, class UInventoryComponent* InventoryComp);
-	void UpdateSlot(FName Name, UTexture2D* Icon, uint8 quantity);
+	void UpdateSlot(FName Name, FName Category, UTexture2D* Icon, uint8 quantity);
 	void UpdateSlot(class UInventoryComponent* InventoryComp) { InvComp = InventoryComp; }
 
 protected:
@@ -49,7 +49,8 @@ public:
 	class UTextBlock* Item_Quantity;
 
 	int SlotIdx = 0; 
-	FName Item_Name = FName("Empty");
+	FName Item_Name = FName("None");
+	FName Item_Category = FName("None");
 	UTexture2D* Item_Texture2D;
 	uint8 Quantity = 0;
 

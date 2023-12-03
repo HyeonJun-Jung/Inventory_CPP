@@ -40,9 +40,10 @@ void UWidget_Inventory_Slot::InitializeSlot(int SlotNum, class UInventoryCompone
 	this->SlotIdx = SlotNum;
 }
 
-void UWidget_Inventory_Slot::UpdateSlot(FName Name, UTexture2D* Icon, uint8 quantity)
+void UWidget_Inventory_Slot::UpdateSlot(FName Name, FName Category, UTexture2D* Icon, uint8 quantity)
 {
 	Item_Name = Name;
+	Item_Category = Category;
 	Item_Texture2D = Icon;
 	Quantity = quantity;
 
@@ -104,14 +105,6 @@ void UWidget_Inventory_Slot::NativeOnDragDetected(const FGeometry& InGeometry, c
 	if (!DragVisualClass)
 		UE_LOG(LogTemp, Warning, TEXT("UWidget_Inventory_Slot : Should Set DragVisualClass."));
 
-	UWidget_Inventory_Slot* DragVisualWidget = CreateWidget<UWidget_Inventory_Slot>(this, DragVisualClass);
-	DragVisualWidget->InvComp = this->InvComp;
-	DragVisualWidget->SlotIdx = this->SlotIdx;
-	DragVisualWidget->Item_Image->SetBrushFromTexture(Item_Texture2D);
-	DragVisualWidget->Item_Quantity->SetText(UKismetTextLibrary::Conv_IntToText(Quantity));
-	DragVisualWidget->Item_Image->SetVisibility(ESlateVisibility::Visible);
-	DragVisualWidget->Item_Quantity->SetVisibility(ESlateVisibility::Visible);
-	// DragDropOperation->DefaultDragVisual = DragVisualWidget;
 	DragDropOperation->DefaultDragVisual = this;
 }
 

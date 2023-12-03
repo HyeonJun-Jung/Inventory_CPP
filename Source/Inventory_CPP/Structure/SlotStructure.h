@@ -16,5 +16,8 @@ struct INVENTORY_CPP_API FSlotStructure
 	FName ID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName Category;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	uint8 Quantity;
 };

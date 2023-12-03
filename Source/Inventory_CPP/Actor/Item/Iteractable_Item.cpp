@@ -46,6 +46,7 @@ void AInteractable_Item::InitItemData()
 		if (itemData)
 		{
 			ItemData_Slot.ID = itemData->ID;
+			ItemData_Slot.Category = itemData->Category;
 			ItemData_Slot.Quantity = Item_Quantity;
 		}
 	}
@@ -74,6 +75,7 @@ void AInteractable_Item::InitItemData_Server_Implementation()
 		if (itemData)
 		{
 			ItemData_Slot.ID = itemData->ID;
+			ItemData_Slot.Category = itemData->Category;
 			ItemData_Slot.Quantity = Item_Quantity;
 		}
 	}

@@ -45,6 +45,9 @@ public:
 	FName Item_ID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName Item_Category;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	uint8 Item_Quantity;
 
 	UPROPERTY()

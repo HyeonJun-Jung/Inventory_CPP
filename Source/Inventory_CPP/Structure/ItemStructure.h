@@ -19,6 +19,9 @@ struct INVENTORY_CPP_API FItemStructure : public FTableRowBase
 	FName Name;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName Category;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName Description;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
