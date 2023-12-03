@@ -24,7 +24,8 @@ bool UWidget_Player_Inventory::Initialize()
 void UWidget_Player_Inventory::NativeConstruct()
 {
 	Super::NativeConstruct();
-	Button_Exit->OnClicked.AddUniqueDynamic(this, &UWidget_Player_Inventory::Exit);
+	if(IsValid(Button_Exit))
+		Button_Exit->OnClicked.AddUniqueDynamic(this, &UWidget_Player_Inventory::Exit);
 }
 
 void UWidget_Player_Inventory::ShowInventory(UInventoryComponent* InventoryComponent)

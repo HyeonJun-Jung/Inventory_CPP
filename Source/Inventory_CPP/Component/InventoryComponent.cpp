@@ -172,6 +172,11 @@ void UInventoryComponent::AddToInventory(FSlotStructure ItemSlot)
 		if (slot.ID.IsEqual(ItemSlot.ID) && slot.Quantity + ItemSlot.Quantity <= itemData->MaxStackSize)
 		{
 			slot.Quantity += ItemSlot.Quantity;
+
+			auto controller = Cast<APlayer_Controller>(GetOwner());
+			if (IsValid(controller))
+				controller->InventoryUpdate();
+
 			return;
 		}
 	}
@@ -181,6 +186,11 @@ void UInventoryComponent::AddToInventory(FSlotStructure ItemSlot)
 		if (slot.ID.IsEqual(FName("Empty")))
 		{
 			slot = ItemSlot;
+
+			auto controller = Cast<APlayer_Controller>(GetOwner());
+			if (IsValid(controller))
+				controller->InventoryUpdate();
+
 			return;
 		}
 	}

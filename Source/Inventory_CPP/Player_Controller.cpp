@@ -27,7 +27,7 @@ void APlayer_Controller::BeginPlay()
 		}
 
 		HUD = CreateWidget<UWidget_Player_HUD>(this, HUDWidgetClass);
-		if (!HUD)
+		if (!IsValid(HUD))
 		{
 			UE_LOG(LogTemp, Display, TEXT("APlayer_Controller: Can't Create UWidget_Player_HUD Widget."));
 			return;
@@ -63,13 +63,13 @@ void APlayer_Controller::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 
 void APlayer_Controller::ShowInventory()
 {
-	if(!InventoryComponent || !HUD) return;
+	if(!IsValid(InventoryComponent) || !IsValid(HUD)) return;
 	HUD->ShowInventory(InventoryComponent);
 }
 
 void APlayer_Controller::ShowChestInventory(UInventoryComponent* ChestInventoryComp)
 {
-	if (!InventoryComponent || !HUD) return;
+	if (!IsValid(InventoryComponent) || !IsValid(HUD)) return;
 	HUD->ShowChestInventory(ChestInventoryComp, InventoryComponent);
 }
 
@@ -130,20 +130,20 @@ void APlayer_Controller::Transfer_Slot_Server_Implementation(UInventoryComponent
 
 void APlayer_Controller::ShowChestInventory_Client_Implementation(UInventoryComponent* ChestInventoryComp)
 {
-	if (!InventoryComponent || !HUD) return;
+	if (!IsValid(InventoryComponent) || !IsValid(HUD)) return;
 	HUD->ShowChestInventory(ChestInventoryComp, InventoryComponent);
 }
 
 void APlayer_Controller::UpdateInventory_Client_Implementation()
 {
-	if (!HUD) return;
+	if (!IsValid(HUD)) return;
 	ShouldUpdateInventory = true;
 	HUD->UpdateInventory();
 }
 
 void APlayer_Controller::InventoryUpdate()
 {
-	if (!HUD) return;
+	if (!IsValid(HUD)) return;
 	ShouldUpdateInventory = true;
 	HUD->UpdateInventory();
 }
