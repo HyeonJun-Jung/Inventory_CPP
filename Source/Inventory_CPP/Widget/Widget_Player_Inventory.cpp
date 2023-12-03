@@ -24,6 +24,7 @@ bool UWidget_Player_Inventory::Initialize()
 void UWidget_Player_Inventory::NativeConstruct()
 {
 	Super::NativeConstruct();
+
 	if(IsValid(Button_Exit))
 		Button_Exit->OnClicked.AddUniqueDynamic(this, &UWidget_Player_Inventory::Exit);
 }

@@ -94,15 +94,11 @@ void UInventoryComponent::Interact_Trace()
 
 	if (hitActor)
 	{
-		if (!Interacting_Actor)
+		if (Interacting_Actor != hitActor)
 		{
 			Interacting_Actor = hitActor;
 			AInteractable_Actor* interactable_Actor = Cast<AInteractable_Actor>(Interacting_Actor);
 			UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent : Interacting Actor Is %s."), *interactable_Actor->GetName());
-		}
-		else
-		{
-
 		}
 	}
 	else
