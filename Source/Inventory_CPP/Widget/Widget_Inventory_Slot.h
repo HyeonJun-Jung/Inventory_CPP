@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Structure/ItemStructure.h"
 #include "Widget_Inventory_Slot.generated.h"
 
 /**
@@ -19,6 +20,7 @@ protected:
 
 public:
 	void InitializeSlot(int SlotNum, class UInventoryComponent* InventoryComp);
+	void UpdateSlot(FItemStructure item, uint8 quantity);
 	void UpdateSlot(FName Name, FName Category, UTexture2D* Icon, uint8 quantity);
 	void UpdateSlot(class UInventoryComponent* InventoryComp) { InvComp = InventoryComp; }
 
@@ -49,6 +51,7 @@ public:
 	class UTextBlock* Item_Quantity;
 
 	int SlotIdx = 0; 
+	FName Item_ID = FName("Empty");
 	FName Item_Name = FName("None");
 	FName Item_Category = FName("None");
 	UTexture2D* Item_Texture2D;

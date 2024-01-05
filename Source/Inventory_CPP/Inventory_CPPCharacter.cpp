@@ -5,6 +5,8 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Component/InventoryComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
@@ -50,7 +52,21 @@ AInventory_CPPCharacter::AInventory_CPPCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-	
+	// Create Mesh for Equipment
+	Helmet = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Helmet"));
+	Helmet->SetupAttachment(GetMesh(), FName("Socket_Head"));
+
+	Armor = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Armor"));
+	Armor->SetupAttachment(GetMesh());
+
+	Glove = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Glove"));
+	Glove->SetupAttachment(GetMesh());
+
+	Pants = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Pants"));
+	Pants->SetupAttachment(GetMesh());
+
+	Shoes = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Shoes"));
+	Shoes->SetupAttachment(GetMesh());
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -110,7 +126,12 @@ void AInventory_CPPCharacter::BeginPlay()
 	}
 	else
 		UE_LOG(LogTemp, Display, TEXT("AInventory_CPPCharacter: Success to Get InventoryComponent"));
-	
+
+	// Set Equipment Master Pose Component
+	Armor->SetMasterPoseComponent(GetMesh());
+	Pants->SetMasterPoseComponent(GetMesh());
+	Glove->SetMasterPoseComponent(GetMesh());
+	Shoes->SetMasterPoseComponent(GetMesh());
 }
 	
 

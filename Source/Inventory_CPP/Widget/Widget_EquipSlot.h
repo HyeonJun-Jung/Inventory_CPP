@@ -28,6 +28,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FEventReply RedirectMouseDownToWidget(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent);
 
+
+	// Detach Equipment From Charactrer
+	void DetachEquipment();
+
 public:
 	class UInventoryComponent* InvComp;
 
@@ -37,6 +41,7 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UButton* EquipSlot_Button;
 
+	FName Item_ID = FName("Empty");
 	FName Item_Name = FName("None");
 	UTexture2D* Item_Texture2D;
 };

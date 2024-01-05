@@ -37,7 +37,7 @@ void ADummyActor::BeginPlay()
 		UE_LOG(LogTemp, Display, TEXT("ADummyActor: Mesh Set up."));
 		ACharacter* player = UGameplayStatics::GetPlayerCharacter(World, 0);
 		if (IsValid(player))
-		{
+		{		
 			if (IsValid(player->GetMesh()->SkeletalMesh))
 			{
 				Mesh->SetSkeletalMesh(player->GetMesh()->SkeletalMesh);

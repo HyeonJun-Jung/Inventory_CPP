@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Engine/DataTable.h"
 #include "Player_Controller.generated.h"
 
 /**
@@ -60,7 +61,21 @@ public:
 	UFUNCTION()
 	void InventoryUpdate();
 
+	// Equipment
+
+	UFUNCTION(Server, reliable)
+	void AttachEquipment_Server(FName ItemID);
+	void AttachEquipment_Server_Implementation(FName ItemID);
+
+	UFUNCTION(Server, reliable)
+	void DetachEquipment_Server(FName ItemID);
+	void DetachEquipment_Server_Implementation(FName ItemID);
+
 private:
+	UPROPERTY()
+	UDataTable* ItemDB;
+
+
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
 	class UInventoryComponent* InventoryComponent;
 

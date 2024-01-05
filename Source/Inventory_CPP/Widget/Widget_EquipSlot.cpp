@@ -27,6 +27,8 @@ void UWidget_EquipSlot::NativeOnDragDetected(const FGeometry& InGeometry, const 
 	if (IsValid(OutOperation))
 		UE_LOG(LogTemp, Warning, TEXT("UWidget_EquipSlot : Drag Again."));
 
+	UE_LOG(LogTemp, Warning, TEXT("UWidget_EquipSlot : Drag Detected."));
+
 	USlotDragDrop* DragDropOperation = NewObject<USlotDragDrop>();
 	OutOperation = DragDropOperation;
 	DragDropOperation->DefaultDragVisual = this;
@@ -52,7 +54,14 @@ bool UWidget_EquipSlot::NativeOnDrop(const FGeometry& InGeometry, const FDragDro
 		if (IsValid(controller))
 		{
 			// Equip Item Through Controller
+			controller->AttachEquipment_Server(DragVisualWidget->Item_ID);
 
+			EquipItem_Image->SetBrushFromTexture(DragVisualWidget->Item_Texture2D);
+			EquipItem_Image->SetVisibility(ESlateVisibility::Visible);
+
+			Item_ID = DragVisualWidget->Item_ID;
+			Item_Name = DragVisualWidget->Item_Name;
+			Item_Texture2D = DragVisualWidget->Item_Texture2D;
 		}
 	}
 
@@ -69,7 +78,27 @@ FEventReply UWidget_EquipSlot::RedirectMouseDownToWidget(const FGeometry& InGeom
 		{
 			Reply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);
 		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("UWidget_EquipSlot : Item Is None."));
+		}
 	}
 
 	return Reply;
+}
+
+void UWidget_EquipSlot::DetachEquipment()
+{
+	APlayerController* LocalController = GetGameInstance()->GetFirstLocalPlayerController();
+	if (IsValid(LocalController))
+	{
+		APlayer_Controller* controller = Cast<APlayer_Controller>(LocalController);
+		if (IsValid(controller))
+		{
+			// UnEquip Item Through Controller
+			controller->DetachEquipment_Server(Item_ID);
+
+			EquipItem_Image->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
 }
