@@ -98,6 +98,14 @@ public:
 	Equipment
 //////////////////
 */
+	UFUNCTION(Server, reliable)
+	void AttachEquipment_Server(FName ItemID);
+	void AttachEquipment_Server_Implementation(FName ItemID);
+
+	UFUNCTION(Server, reliable)
+	void DetachEquipment_Server(FName ItemID);
+	void DetachEquipment_Server_Implementation(FName ItemID);
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* Helmet;
 

@@ -2,12 +2,14 @@
 
 
 #include "Player_Controller.h"
+#include "Inventory_CPPCharacter.h"
 #include "GameFramework/Character.h"
 #include "Component/InventoryComponent.h"
 #include "Widget/Widget_Player_HUD.h"
 #include "Net/UnrealNetwork.h"
 #include "Actor/Item/Equipable_Item.h"
 #include "Actor/Item/Iteractable_Item.h"
+
 
 APlayer_Controller::APlayer_Controller()
 {
@@ -212,12 +214,11 @@ void APlayer_Controller::DetachEquipment_Server_Implementation(FName ItemID)
 		return;
 	}
 
-	ACharacter* character = GetCharacter();
+	AInventory_CPPCharacter* character = Cast<AInventory_CPPCharacter>(GetCharacter());
 	if (!IsValid(character))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("APlayer_Controller : Can't Get Character."));
+		UE_LOG(LogTemp, Warning, TEXT("APlayer_Controller : Can't Get AInventory_CPPCharacter."));
 		return;
 	}
-
 
 }

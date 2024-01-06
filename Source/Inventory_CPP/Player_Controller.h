@@ -62,7 +62,6 @@ public:
 	void InventoryUpdate();
 
 	// Equipment
-
 	UFUNCTION(Server, reliable)
 	void AttachEquipment_Server(FName ItemID);
 	void AttachEquipment_Server_Implementation(FName ItemID);
@@ -70,6 +69,10 @@ public:
 	UFUNCTION(Server, reliable)
 	void DetachEquipment_Server(FName ItemID);
 	void DetachEquipment_Server_Implementation(FName ItemID);
+
+
+public:
+	UDataTable* GetItemDB() { return ItemDB; }
 
 private:
 	UPROPERTY()

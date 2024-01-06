@@ -34,6 +34,8 @@ struct INVENTORY_CPP_API FItemStructure : public FTableRowBase
 	TSubclassOf<AActor> ItemClass;
 
 	// For Equipment
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName EquipType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName SocketName;
