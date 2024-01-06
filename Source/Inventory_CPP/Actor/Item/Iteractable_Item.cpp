@@ -11,6 +11,13 @@ AInteractable_Item::AInteractable_Item()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	RootComponent = CreateDefaultSubobject<USceneComponent>(FName("Root"));
+
+	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName("StaticMesh"));
+	StaticMesh->SetupAttachment(RootComponent);
+
+	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(FName("SkeltetalMesh"));
+	SkeletalMesh->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -37,7 +44,6 @@ void AInteractable_Item::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-
 void AInteractable_Item::InitItemData()
 {
 	if (IsValid(ItemDB))
@@ -46,14 +52,35 @@ void AInteractable_Item::InitItemData()
 		if (itemData)
 		{
 			ItemData_Slot.ID = itemData->ID;
+			ItemData_Slot.Category = itemData->Category;
 			ItemData_Slot.Quantity = Item_Quantity;
 		}
 	}
 }
 
 
+void AInteractable_Item::SetCollision_Multicast_Implementation(bool Collisionable)
+{
+	if (!Collisionable)
+	{
+		if (IsValid(StaticMesh))
+			StaticMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		if (IsValid(SkeletalMesh))
+			SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	else
+	{
+		if (IsValid(StaticMesh))
+			StaticMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		if (IsValid(SkeletalMesh))
+			SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+}
+
 void AInteractable_Item::Interact_With_Implementation(UInventoryComponent* InventoryComponent)
 {
+	if (!Interactable) return;
+
 	UE_LOG(LogTemp, Display, TEXT("Interact_With_Implementation HAS BEEN CALLED"));
 
 	if (InventoryComponent)
@@ -74,6 +101,7 @@ void AInteractable_Item::InitItemData_Server_Implementation()
 		if (itemData)
 		{
 			ItemData_Slot.ID = itemData->ID;
+			ItemData_Slot.Category = itemData->Category;
 			ItemData_Slot.Quantity = Item_Quantity;
 		}
 	}

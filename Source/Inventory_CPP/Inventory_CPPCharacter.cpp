@@ -5,11 +5,14 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Component/InventoryComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Engine/Engine.h"
+#include "Engine/DataTable.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AInventory_CPPCharacter
@@ -50,7 +53,21 @@ AInventory_CPPCharacter::AInventory_CPPCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-	
+	// Create Mesh for Equipment
+	Helmet = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Helmet"));
+	Helmet->SetupAttachment(GetMesh(), FName("Socket_Head"));
+
+	Armor = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Armor"));
+	Armor->SetupAttachment(GetMesh());
+
+	Glove = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Glove"));
+	Glove->SetupAttachment(GetMesh());
+
+	Pants = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Pants"));
+	Pants->SetupAttachment(GetMesh());
+
+	Shoes = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Shoes"));
+	Shoes->SetupAttachment(GetMesh());
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -110,7 +127,12 @@ void AInventory_CPPCharacter::BeginPlay()
 	}
 	else
 		UE_LOG(LogTemp, Display, TEXT("AInventory_CPPCharacter: Success to Get InventoryComponent"));
-	
+
+	// Set Equipment Master Pose Component
+	Armor->SetMasterPoseComponent(GetMesh());
+	Pants->SetMasterPoseComponent(GetMesh());
+	Glove->SetMasterPoseComponent(GetMesh());
+	Shoes->SetMasterPoseComponent(GetMesh());
 }
 	
 
@@ -191,6 +213,94 @@ void AInventory_CPPCharacter::Interact_Server_Implementation(UInventoryComponent
 				UE_LOG(LogTemp, Display, TEXT("AInventory_CPPCharacter : Controller Is Not Valid."));
 		}
 	}*/
+}
+
+void AInventory_CPPCharacter::AttachEquipment_Server_Implementation(FName ItemID)
+{
+	if (!IsValid(Controller))
+	{
+		Controller = Cast<APlayer_Controller>(GetController());
+		if (!IsValid(Controller))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("AInventory_CPPCharacter : Can't Get Controller."), *ItemID.ToString());
+			return;
+		}
+	}
+
+	UDataTable* ItemDB = Controller->GetItemDB();
+	if (!IsValid(ItemDB))
+		return;
+
+	FItemStructure* itemData = ItemDB->FindRow<FItemStructure>(ItemID, ItemID.ToString());
+	if (!itemData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AInventory_CPPCharacter : Can't Find ItemID From ItemDB."), *ItemID.ToString());
+		return;
+	}
+
+	if (itemData->EquipType.IsEqual(FName("Helmet")))
+	{
+		if (IsValid(itemData->StaticMesh))
+			Helmet->SetStaticMesh(itemData->StaticMesh);
+	}
+	else if (itemData->EquipType.IsEqual(FName("Armor")))
+	{
+		if (IsValid(itemData->SkeletonMesh))
+			Armor->SetSkeletalMesh(itemData->SkeletonMesh);
+	}
+	else if (itemData->EquipType.IsEqual(FName("Glove")))
+	{
+		if (IsValid(itemData->SkeletonMesh))
+			Glove->SetSkeletalMesh(itemData->SkeletonMesh);
+	}
+	else if (itemData->EquipType.IsEqual(FName("Pants")))
+	{
+		if (IsValid(itemData->SkeletonMesh))
+			Pants->SetSkeletalMesh(itemData->SkeletonMesh);
+	}
+	else if (itemData->EquipType.IsEqual(FName("Shoes")))
+	{
+		if (IsValid(itemData->SkeletonMesh))
+			Shoes->SetSkeletalMesh(itemData->SkeletonMesh);
+	}
+}
+
+void AInventory_CPPCharacter::DetachEquipment_Server_Implementation(FName ItemID)
+{
+	if (!IsValid(Controller))
+		return;
+
+	UDataTable* ItemDB = Controller->GetItemDB();
+	if (!IsValid(ItemDB))
+		return;
+
+	FItemStructure* itemData = ItemDB->FindRow<FItemStructure>(ItemID, ItemID.ToString());
+	if (!itemData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AInventory_CPPCharacter : Can't Find ItemID From ItemDB."), *ItemID.ToString());
+		return;
+	}
+
+	if (itemData->EquipType.IsEqual(FName("Helmet")))
+	{
+		Helmet->SetStaticMesh(nullptr);
+	}
+	else if (itemData->EquipType.IsEqual(FName("Armor")))
+	{
+		Armor->SetSkeletalMesh(nullptr);
+	}
+	else if (itemData->EquipType.IsEqual(FName("Glove")))
+	{
+		Glove->SetSkeletalMesh(nullptr);
+	}
+	else if (itemData->EquipType.IsEqual(FName("Pants")))
+	{
+		Pants->SetSkeletalMesh(nullptr);
+	}
+	else if (itemData->EquipType.IsEqual(FName("Shoes")))
+	{
+		Shoes->SetSkeletalMesh(nullptr);
+	}
 }
 
 void AInventory_CPPCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)

@@ -28,6 +28,12 @@ public:
 
 
 public:
+	UFUNCTION(NetMulticast, reliable)
+	void SetCollision_Multicast(bool Collisionable);
+	void SetCollision_Multicast_Implementation(bool Collisionable);
+
+	void SetInteractable(bool IsPossible) { Interactable = IsPossible; }
+
 	virtual void Interact_With_Implementation(UInventoryComponent* InventoryComponent) override;
 
 	void InitItemData();
@@ -38,11 +44,22 @@ public:
 	void InitItemData_Server_Implementation();
 
 public:
+	bool Interactable = true;;
+
 	UPROPERTY()
 	UDataTable* ItemDB;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* StaticMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMeshComponent* SkeletalMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName Item_ID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName Item_Category;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	uint8 Item_Quantity;

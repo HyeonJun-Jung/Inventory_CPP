@@ -2,9 +2,15 @@
 
 
 #include "Player_Controller.h"
+#include "Inventory_CPPCharacter.h"
+#include "GameFramework/Character.h"
 #include "Component/InventoryComponent.h"
 #include "Widget/Widget_Player_HUD.h"
 #include "Net/UnrealNetwork.h"
+#include "Actor/Item/Equipable_Item.h"
+#include "Actor/Item/Iteractable_Item.h"
+
+
 APlayer_Controller::APlayer_Controller()
 {
 	// Create a Inventory Component
@@ -14,6 +20,16 @@ APlayer_Controller::APlayer_Controller()
 void APlayer_Controller::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UDataTable* BP_ItemDB = LoadObject<UDataTable>(this, TEXT("/Game/Inventory/Data/DB_ItemData.DB_ItemData"));
+	if (IsValid(BP_ItemDB))
+	{
+		ItemDB = BP_ItemDB;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("APlayer_Controller : Can't Get DataTable."))
+	}
 
 
 	InventoryComponent->Set_Traceable(true);
@@ -78,8 +94,6 @@ void APlayer_Controller::Transfer_Slot_Server_Implementation(UInventoryComponent
 	// Test
 	TArray<FSlotStructure>& SourceContents = SourceInv->GetContents();
 	TArray<FSlotStructure>& DestContents = DestInv->GetContents();
-
-	auto ItemDB = SourceInv->GetItemDB();
 
 	// Case : SourceItemID == DestItemID
 	if (DestContents[DestIdx].ID == SourceContents[SourceIdx].ID)
@@ -146,4 +160,65 @@ void APlayer_Controller::InventoryUpdate()
 	if (!IsValid(HUD)) return;
 	ShouldUpdateInventory = true;
 	HUD->UpdateInventory();
+}
+
+void APlayer_Controller::AttachEquipment_Server_Implementation(FName ItemID)
+{
+	if (!IsValid(ItemDB)) return;
+
+	FItemStructure* itemData = ItemDB->FindRow<FItemStructure>(ItemID, ItemID.ToString());
+	if (!itemData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("APlayer_Controller : Can't Find ItemID From ItemDB."), *ItemID.ToString());
+		return;
+	}
+
+	ACharacter* character = GetCharacter();
+	if (!IsValid(character))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("APlayer_Controller : Can't Get Character."));
+		return;
+	}
+
+	if (IsValid(itemData->StaticMesh))
+	{
+
+	}
+
+	if (IsValid(itemData->SkeletonMesh))
+	{
+		
+	}
+
+
+	USkeletalMeshComponent* CharacterMesh = character->GetMesh();
+	if (!IsValid(CharacterMesh)) return;
+
+	AInteractable_Item* Item = GetWorld()->SpawnActor<AInteractable_Item>
+		(itemData->ItemClass.Get(), FVector::ZeroVector, FRotator::ZeroRotator);
+	Item->AttachToComponent(CharacterMesh, FAttachmentTransformRules::KeepRelativeTransform, itemData->SocketName);
+	Item->SetActorRelativeTransform(itemData->RelativeTransform);
+	Item->SetInteractable(false);
+	Item->SetOwner(this);
+	Item->SetCollision_Multicast(false);
+}
+
+void APlayer_Controller::DetachEquipment_Server_Implementation(FName ItemID)
+{
+	if (!IsValid(ItemDB)) return;
+
+	FItemStructure* itemData = ItemDB->FindRow<FItemStructure>(ItemID, ItemID.ToString());
+	if (!itemData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("APlayer_Controller : Can't Find ItemID From ItemDB."), *ItemID.ToString());
+		return;
+	}
+
+	AInventory_CPPCharacter* character = Cast<AInventory_CPPCharacter>(GetCharacter());
+	if (!IsValid(character))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("APlayer_Controller : Can't Get AInventory_CPPCharacter."));
+		return;
+	}
+
 }

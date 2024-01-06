@@ -91,6 +91,35 @@ public:
 	UFUNCTION(Server, reliable)
 	void Interact_Server(UInventoryComponent* InvComp);
 	void Interact_Server_Implementation(UInventoryComponent* InvComp);
+
+
+/*
+//////////////////
+	Equipment
+//////////////////
+*/
+	UFUNCTION(Server, reliable)
+	void AttachEquipment_Server(FName ItemID);
+	void AttachEquipment_Server_Implementation(FName ItemID);
+
+	UFUNCTION(Server, reliable)
+	void DetachEquipment_Server(FName ItemID);
+	void DetachEquipment_Server_Implementation(FName ItemID);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
+	class UStaticMeshComponent* Helmet;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
+	class USkeletalMeshComponent* Armor;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
+	class USkeletalMeshComponent* Glove;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
+	class USkeletalMeshComponent* Pants;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
+	class USkeletalMeshComponent* Shoes;
 	
 };
 

@@ -19,6 +19,9 @@ struct INVENTORY_CPP_API FItemStructure : public FTableRowBase
 	FName Name;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName Category;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName Description;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -29,4 +32,20 @@ struct INVENTORY_CPP_API FItemStructure : public FTableRowBase
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AActor> ItemClass;
+
+	// For Equipment
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName EquipType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName SocketName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FTransform RelativeTransform;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMesh* SkeletonMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMesh* StaticMesh;
 };

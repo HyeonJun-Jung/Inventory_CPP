@@ -2,6 +2,7 @@
 
 
 #include "Widget/Widget_Inventory_Slot.h"
+#include "Widget/Widget_EquipSlot.h"
 #include "Widget/Widget_ActionBar.h"
 #include "Widget/SlotDragDrop.h"
 #include "Components/Image.h"
@@ -40,9 +41,33 @@ void UWidget_Inventory_Slot::InitializeSlot(int SlotNum, class UInventoryCompone
 	this->SlotIdx = SlotNum;
 }
 
-void UWidget_Inventory_Slot::UpdateSlot(FName Name, UTexture2D* Icon, uint8 quantity)
+void UWidget_Inventory_Slot::UpdateSlot(FItemStructure item, uint8 quantity)
+{
+	Item_ID = item.ID;
+	Item_Name = item.Name;
+	Item_Category = item.Category;
+	Item_Texture2D = item.Icon;
+	Quantity = quantity;
+
+	Item_Image->SetBrushFromTexture(item.Icon);
+	Item_Quantity->SetText(UKismetTextLibrary::Conv_IntToText(quantity));
+
+	if (Quantity != 0)
+	{
+		Item_Image->SetVisibility(ESlateVisibility::Visible);
+		Item_Quantity->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		Item_Image->SetVisibility(ESlateVisibility::Hidden);
+		Item_Quantity->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void UWidget_Inventory_Slot::UpdateSlot(FName Name, FName Category, UTexture2D* Icon, uint8 quantity)
 {
 	Item_Name = Name;
+	Item_Category = Category;
 	Item_Texture2D = Icon;
 	Quantity = quantity;
 
@@ -104,14 +129,6 @@ void UWidget_Inventory_Slot::NativeOnDragDetected(const FGeometry& InGeometry, c
 	if (!DragVisualClass)
 		UE_LOG(LogTemp, Warning, TEXT("UWidget_Inventory_Slot : Should Set DragVisualClass."));
 
-	UWidget_Inventory_Slot* DragVisualWidget = CreateWidget<UWidget_Inventory_Slot>(this, DragVisualClass);
-	DragVisualWidget->InvComp = this->InvComp;
-	DragVisualWidget->SlotIdx = this->SlotIdx;
-	DragVisualWidget->Item_Image->SetBrushFromTexture(Item_Texture2D);
-	DragVisualWidget->Item_Quantity->SetText(UKismetTextLibrary::Conv_IntToText(Quantity));
-	DragVisualWidget->Item_Image->SetVisibility(ESlateVisibility::Visible);
-	DragVisualWidget->Item_Quantity->SetVisibility(ESlateVisibility::Visible);
-	// DragDropOperation->DefaultDragVisual = DragVisualWidget;
 	DragDropOperation->DefaultDragVisual = this;
 }
 
@@ -122,18 +139,30 @@ bool UWidget_Inventory_Slot::NativeOnDrop(const FGeometry& InGeometry, const FDr
 	UE_LOG(LogTemp, Warning, TEXT("UWidget_Inventory_Slot : NativeOnDrop SlotIdx : %d."), SlotIdx);
 
 	UWidget_Inventory_Slot* DragVisualWidget = Cast<UWidget_Inventory_Slot>(InOperation->DefaultDragVisual);
-	
-	UInventoryComponent* SourceInv = DragVisualWidget->InvComp;
-	int SourceIdx = DragVisualWidget->SlotIdx;
-
-	//InvComp->Transfer_Slot_Server(SourceInv, SourceIdx, SlotIdx);
-
-	APlayerController* LocalController = GetGameInstance()->GetFirstLocalPlayerController();
-	if (IsValid(LocalController))
+	if (IsValid(DragVisualWidget))
 	{
-		APlayer_Controller* controller = Cast<APlayer_Controller>(LocalController);
-		if (IsValid(controller))
-			controller->Transfer_Slot_Server(SourceInv, SourceIdx, InvComp, SlotIdx);
+		UInventoryComponent* SourceInv = DragVisualWidget->InvComp;
+		int SourceIdx = DragVisualWidget->SlotIdx;
+
+		//InvComp->Transfer_Slot_Server(SourceInv, SourceIdx, SlotIdx);
+
+		APlayerController* LocalController = GetGameInstance()->GetFirstLocalPlayerController();
+		if (IsValid(LocalController))
+		{
+			APlayer_Controller* controller = Cast<APlayer_Controller>(LocalController);
+			if (IsValid(controller))
+				controller->Transfer_Slot_Server(SourceInv, SourceIdx, InvComp, SlotIdx);
+		}
+
+		return true;
+	}
+
+	UWidget_EquipSlot* EquipSlot = Cast<UWidget_EquipSlot>(InOperation->DefaultDragVisual);
+	if (IsValid(EquipSlot))
+	{
+		EquipSlot->DetachEquipment();	
+
+		return true;
 	}
 
 	return true;
