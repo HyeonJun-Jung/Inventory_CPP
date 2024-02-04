@@ -12,6 +12,7 @@ struct INVENTORY_CPP_API FItemStructure : public FTableRowBase
 	GENERATED_BODY()
 	FItemStructure() {}
 
+	// Item Base
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName ID;
 
@@ -33,7 +34,13 @@ struct INVENTORY_CPP_API FItemStructure : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AActor> ItemClass;
 
-	// For Equipment
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMesh* SkeletonMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMesh* StaticMesh;
+
+	// For Equipment System
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName EquipType;
 
@@ -43,9 +50,10 @@ struct INVENTORY_CPP_API FItemStructure : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTransform RelativeTransform;
 
+	// For Building System
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USkeletalMesh* SkeletonMesh;
+	bool Buildable;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UStaticMesh* StaticMesh;
+	TEnumAsByte<ETraceTypeQuery> LayerTraceChannel;
 };

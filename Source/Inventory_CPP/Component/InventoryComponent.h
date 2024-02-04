@@ -82,6 +82,9 @@ private:
 	int Inventory_Size = 30;
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
+	TArray<FSlotStructure> QuickSlot;
+
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
 	TArray<FSlotStructure> Contents;
 
