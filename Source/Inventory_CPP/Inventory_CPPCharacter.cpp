@@ -86,6 +86,7 @@ void AInventory_CPPCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	// Relate to Inventory Key binding
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AInventory_CPPCharacter::Interact);
 	PlayerInputComponent->BindAction("Inventory", IE_Pressed, this, &AInventory_CPPCharacter::Inventory);
+	PlayerInputComponent->BindAction("Num", IE_Released, this, &AInventory_CPPCharacter::UpdateCurrentQuickSlot);
 
 	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &AInventory_CPPCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right / Left", this, &AInventory_CPPCharacter::MoveRight);
@@ -177,6 +178,14 @@ void AInventory_CPPCharacter::Interact()
 		}
 	}
 
+}
+
+void AInventory_CPPCharacter::UpdateCurrentQuickSlot(FKey key)
+{
+	if (IsValid(Controller))
+	{
+		Controller->UpdateCurrentQuickSlot(key);
+	}
 }
 
 void AInventory_CPPCharacter::Interact_Server_Implementation(UInventoryComponent* InvComp)

@@ -20,7 +20,7 @@ UInventoryComponent::UInventoryComponent()
 }
 
 
-// Called when the game starts
+// Called when the game startsFSlotStructure item; item.ID = FName("Empty"); item.Quantity = 0;
 void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -41,6 +41,12 @@ void UInventoryComponent::BeginPlay()
 	{
 		FSlotStructure item; item.ID = FName("Empty"); item.Quantity = 0;
 		Contents.Add(item);
+	}
+
+	for (int i = 0; i < 8; i++)
+	{
+		FSlotStructure item; item.ID = FName("Empty"); item.Quantity = 0;
+		QuickSlots.Add(item);
 	}
 }
 
@@ -162,6 +168,34 @@ void UInventoryComponent::AddToInventory(FSlotStructure ItemSlot)
 		UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent : ID <%s> Can't Add To Inventory."), *ItemSlot.ID.ToString());
 		return;
 	}
+
+	for (FSlotStructure& slot : QuickSlots)
+	{
+		if (slot.ID.IsEqual(ItemSlot.ID) && slot.Quantity + ItemSlot.Quantity <= itemData->MaxStackSize)
+		{
+			slot.Quantity += ItemSlot.Quantity;
+
+			auto controller = Cast<APlayer_Controller>(GetOwner());
+			if (IsValid(controller))
+				controller->InventoryUpdate();
+
+			return;
+		}
+	}
+
+	for (FSlotStructure& slot : QuickSlots)
+	{
+		if (slot.ID.IsEqual(FName("Empty")))
+		{
+			slot = ItemSlot;
+
+			auto controller = Cast<APlayer_Controller>(GetOwner());
+			if (IsValid(controller))
+				controller->InventoryUpdate();
+
+			return;
+		}
+	}
 		
 	for (FSlotStructure& slot : Contents)
 	{
@@ -192,8 +226,58 @@ void UInventoryComponent::AddToInventory(FSlotStructure ItemSlot)
 	}
 }
 
+void UInventoryComponent::RemoveItem_QuickSlot_Server_Implementation(int SlotIndex, bool Consumed, int Quantity)
+{
+	if (QuickSlots[SlotIndex].Quantity <= 0)
+		return;
+
+	if (Consumed)
+	{
+		QuickSlots[SlotIndex].Quantity -= Quantity;
+	}
+	else
+	{
+		FItemStructure* itemData = ItemDB->FindRow<FItemStructure>(QuickSlots[SlotIndex].ID, QuickSlots[SlotIndex].ID.ToString());
+		if (!itemData)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent : Can't find Item ID <%s> From QuickSlots."), *QuickSlots[SlotIndex].ID.ToString());
+			return;
+		}
+
+		QuickSlots[SlotIndex].Quantity -= Quantity;
+		if (IsValid(itemData->ItemClass))
+		{
+			APlayerController* controller = Cast<APlayerController>(GetOwner());
+			if (IsValid(controller))
+			{
+				APawn* pawn = controller->GetPawn();
+				FVector location = pawn->GetActorLocation();
+				location += GetOwner()->GetActorForwardVector() * 100;
+				GetWorld()->SpawnActor<AActor>(itemData->ItemClass.Get(), location, FRotator::ZeroRotator);
+			}
+			else
+			{
+				FVector location = GetOwner()->GetActorLocation();
+				location += GetOwner()->GetActorForwardVector() * 100;
+				GetWorld()->SpawnActor<AActor>(itemData->ItemClass.Get(), location, FRotator::ZeroRotator);
+			}
+		}
+		else
+			UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent : ItemClass is not valid."));
+	}
+
+	if (QuickSlots[SlotIndex].Quantity == 0)
+		QuickSlots[SlotIndex].ID = FName("Empty");
+
+
+	UpdateInventory_Multicast();
+}
+
 void UInventoryComponent::RemoveItem_Server_Implementation(int SlotIndex, bool Consumed, int Quantity)
 {
+	if (Contents[SlotIndex].Quantity <= 0)
+		return;
+
 	if (Consumed)
 	{
 		Contents[SlotIndex].Quantity -= Quantity;
@@ -288,4 +372,25 @@ void UInventoryComponent::UpdateInventory_Multicast_Implementation()
 	if (!controller)
 		UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent : Can't Cast to Player_Controller."));
 	controller->InventoryUpdate();
+}
+
+void UInventoryComponent::UpdateCurrentQuickSlot(FKey key)
+{
+	UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent : %s"), *key.GetFName().ToString());
+	if(key.GetFName().IsEqual(FName("One")))
+		CurrentQuickSlotNum = 0;
+	else if (key.GetFName().IsEqual(FName("Two")))
+		CurrentQuickSlotNum = 1;
+	else if (key.GetFName().IsEqual(FName("Three")))
+		CurrentQuickSlotNum = 2;
+	else if (key.GetFName().IsEqual(FName("Four")))
+		CurrentQuickSlotNum = 3;
+	else if (key.GetFName().IsEqual(FName("Five")))
+		CurrentQuickSlotNum = 4;
+	else if (key.GetFName().IsEqual(FName("Six")))
+		CurrentQuickSlotNum = 5;
+	else if (key.GetFName().IsEqual(FName("Seven")))
+		CurrentQuickSlotNum = 6;
+	else if (key.GetFName().IsEqual(FName("Eight")))
+		CurrentQuickSlotNum = 7;
 }

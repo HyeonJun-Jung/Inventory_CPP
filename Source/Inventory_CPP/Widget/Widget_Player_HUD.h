@@ -20,12 +20,15 @@ protected:
 
 public:
 	void ShowInventory(class UInventoryComponent* InventoryComponent);
-	void UpdateInventory();
-
 	void ShowChestInventory(class UInventoryComponent* ChestInvComp, class UInventoryComponent* playerInvComp);
+	void UpdateInventory();
+	void UpdateCurrentQuickslot(FKey key);
 
 	UClass* InventoryWidgetClass;
 	UClass* ChestWidgetClass;
+
+	UPROPERTY(meta = (BindWidget))
+	class UWidget_QuickSlot_Grid* Widget_QuickSlot_Grid;
 
 	UPROPERTY(meta = (BindWidget))
 	UCanvasPanel* CanvasPanel;

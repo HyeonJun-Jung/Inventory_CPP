@@ -88,9 +88,13 @@ public:
 
 	void Interact();
 
+	void UpdateCurrentQuickSlot(FKey key);
+
 	UFUNCTION(Server, reliable)
 	void Interact_Server(UInventoryComponent* InvComp);
 	void Interact_Server_Implementation(UInventoryComponent* InvComp);
+
+	
 
 
 /*

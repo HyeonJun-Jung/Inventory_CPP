@@ -2,6 +2,7 @@
 
 
 #include "Widget/Widget_Inventory_Slot.h"
+#include "Widget/Widget_QuickSlot.h"
 #include "Widget/Widget_EquipSlot.h"
 #include "Widget/Widget_ActionBar.h"
 #include "Widget/SlotDragDrop.h"
@@ -110,7 +111,7 @@ FReply UWidget_Inventory_Slot::NativeOnMouseButtonUp(const FGeometry& InGeometry
 	UE_LOG(LogTemp, Warning, TEXT("UWidget_Inventory_Slot : NativeOnMouseButtonUp HAS BEEN CALLED."));
 
 	FEventReply Reply;
-	Reply.NativeReply = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+	Reply.NativeReply = Super::NativeOnMouseButtonUp(InGeometry, InMouseEvent);
 
 	return Reply.NativeReply;
 }
@@ -161,6 +162,22 @@ bool UWidget_Inventory_Slot::NativeOnDrop(const FGeometry& InGeometry, const FDr
 	if (IsValid(EquipSlot))
 	{
 		EquipSlot->DetachEquipment();	
+
+		return true;
+	}
+
+	UWidget_QuickSlot* QuickSlot = Cast<UWidget_QuickSlot>(InOperation->DefaultDragVisual);
+	if (IsValid(QuickSlot))
+	{
+		int SourceIdx = QuickSlot->SlotIdx;
+
+		APlayerController* LocalController = GetGameInstance()->GetFirstLocalPlayerController();
+		if (IsValid(LocalController))
+		{
+			APlayer_Controller* controller = Cast<APlayer_Controller>(LocalController);
+			if (IsValid(controller))
+				controller->Transfer_Slot_QuickToInv_Server(SlotIdx, SourceIdx);
+		}
 
 		return true;
 	}

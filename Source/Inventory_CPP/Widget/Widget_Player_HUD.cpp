@@ -5,8 +5,10 @@
 #include "Widget/Widget_Inventory.h"
 #include "Widget/Widget_Player_Inventory.h"
 #include "Widget/Widget_Chest_Inventory.h"
+#include "Widget/Widget_QuickSlot_Grid.h"
 #include "Component/InventoryComponent.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
+#include "Player_Controller.h"
 
 bool UWidget_Player_HUD::Initialize()
 {
@@ -28,6 +30,15 @@ bool UWidget_Player_HUD::Initialize()
 		UE_LOG(LogTemp, Display, TEXT("UWidget_Player_HUD: Can't Bind Canvas Panel."));
 		return false;
 	}
+
+	UWorld* world = GetWorld();
+	if (!IsValid(world)) return false;
+
+	APlayerController* Controller = world->GetFirstPlayerController(); if (!IsValid(Controller)) return false;
+	APlayer_Controller* playerController = Cast<APlayer_Controller>(Controller); if (!IsValid(playerController)) return false;
+	UInventoryComponent* InventoryComponent = playerController->GetInventoryComponent(); if (!IsValid(InventoryComponent)) return false;
+
+	Widget_QuickSlot_Grid->Initialize_QuickSlotGrid(InventoryComponent);
 
 	return true;
 }
@@ -92,6 +103,17 @@ void UWidget_Player_HUD::UpdateInventory()
 	{
 		Widget_ChestInventory->Update_ChestInventory();
 	}
+
+	if (IsValid(Widget_QuickSlot_Grid))
+	{
+		Widget_QuickSlot_Grid->UpdateInventoryGrid();
+	}
+}
+
+void UWidget_Player_HUD::UpdateCurrentQuickslot(FKey key)
+{
+	if (IsValid(Widget_QuickSlot_Grid))
+		Widget_QuickSlot_Grid->UpdateCurrentQuickslot(key);
 }
 
 void UWidget_Player_HUD::ShowChestInventory(UInventoryComponent* ChestInvComp, UInventoryComponent* playerInvComp)

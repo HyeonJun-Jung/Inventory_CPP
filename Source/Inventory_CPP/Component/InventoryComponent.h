@@ -58,20 +58,27 @@ private:
 public:
 	UDataTable* GetItemDB() { return ItemDB; };
 	TArray<FSlotStructure>& GetContents() { return Contents; }
+	TArray<FSlotStructure>& GetQuickSlots() { return QuickSlots; }
 	void LogInventoryContents();
 	void AddToInventory(FSlotStructure ItemSlot);
+
+	UFUNCTION(Server, reliable, BlueprintCallable)
+	void RemoveItem_QuickSlot_Server(int SlotIndex, bool Consumed, int Quantity);
+	void RemoveItem_QuickSlot_Server_Implementation(int SlotIndex, bool Consumed, int Quantity);
 	
-	UFUNCTION(Server, reliable)
+	UFUNCTION(Server, reliable, BlueprintCallable)
 	void RemoveItem_Server(int SlotIndex, bool Consumed, int Quantity);
 	void RemoveItem_Server_Implementation(int SlotIndex, bool Consumed, int Quantity);
 
 	UFUNCTION(Server, reliable)
 	void Transfer_Slot_Server(UInventoryComponent* SourceInv, int SourceIdx, int DestIdx);
 	void Transfer_Slot_Server_Implementation(UInventoryComponent* SourceInv, int SourceIdx, int DestIdx);
-
+	
 	UFUNCTION(NetMulticast, reliable)
 	void UpdateInventory_Multicast();
 	void UpdateInventory_Multicast_Implementation();
+
+	void UpdateCurrentQuickSlot(FKey key);
 
 
 private:
@@ -83,7 +90,10 @@ private:
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
-	TArray<FSlotStructure> QuickSlot;
+	uint8 CurrentQuickSlotNum = 0;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
+	TArray<FSlotStructure> QuickSlots;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
 	TArray<FSlotStructure> Contents;

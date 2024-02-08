@@ -34,6 +34,7 @@ public:
 //////////////////
 */
 	class UWidget_Player_HUD* HUD;
+	uint8 CurrentQuickSlotNum = 0;
 
 /*
 //////////////////
@@ -43,12 +44,25 @@ public:
 
 public:
 	void ShowInventory();
-	
 	void ShowChestInventory(class UInventoryComponent* ChestInventoryComp);
+	void UpdateCurrentQuickSlot(FKey key);
 
 	UFUNCTION(Server, reliable)
 	void Transfer_Slot_Server(UInventoryComponent* SourceInv, int SourceIdx, UInventoryComponent* DestInv, int DestIdx);
 	void Transfer_Slot_Server_Implementation(UInventoryComponent* SourceInv, int SourceIdx, UInventoryComponent* DestInv, int DestIdx);
+
+	UFUNCTION(Server, reliable)
+	void Transfer_Slot_InvToQuick_Server(int InventoryIdx, int QuickSlotIdx);
+	void Transfer_Slot_InvToQuick_Server_Implementation(int InventoryIdx, int QuickSlotIdx);
+
+	UFUNCTION(Server, reliable)
+	void Transfer_Slot_QuickToInv_Server(int InventoryIdx, int QuickSlotIdx);
+	void Transfer_Slot_QuickToInv_Server_Implementation(int InventoryIdx, int QuickSlotIdx);
+
+
+	UFUNCTION(Server, reliable)
+	void Transfer_Slot_QuickToQuick_Server(int SourceIdx, int DestIdx);
+	void Transfer_Slot_QuickToQuick_Server_Implementation(int SourceIdx, int DestIdx);
 
 	UFUNCTION(client, Reliable)
 	void ShowChestInventory_Client(class UInventoryComponent* ChestInventoryComp);
@@ -77,7 +91,6 @@ public:
 private:
 	UPROPERTY()
 	UDataTable* ItemDB;
-
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
 	class UInventoryComponent* InventoryComponent;
