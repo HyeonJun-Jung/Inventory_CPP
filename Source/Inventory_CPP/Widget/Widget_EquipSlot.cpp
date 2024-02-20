@@ -3,6 +3,7 @@
 
 #include "Widget/Widget_EquipSlot.h"
 #include "Widget/Widget_Inventory_Slot.h"
+#include "Widget/Widget_QuickSlot.h"
 #include "Widget/SlotDragDrop.h"
 #include "Components/Image.h"
 #include "Components/Button.h"
@@ -40,35 +41,69 @@ bool UWidget_EquipSlot::NativeOnDrop(const FGeometry& InGeometry, const FDragDro
 {
 	Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 
-	UWidget_Inventory_Slot* DragVisualWidget = Cast<UWidget_Inventory_Slot>(InOperation->DefaultDragVisual);
-
-	if (!DragVisualWidget->Item_Category.IsEqual(FName("Equipment")))
-		return true;
-
-	UInventoryComponent* SourceInv = DragVisualWidget->InvComp;
-	int SourceIdx = DragVisualWidget->SlotIdx;
-	FName itemName = DragVisualWidget->Item_Name;
-
+	UWidget_Inventory_Slot* InventorySlot = Cast<UWidget_Inventory_Slot>(InOperation->DefaultDragVisual);
 	
-	
-	APlayerController* LocalController = GetGameInstance()->GetFirstLocalPlayerController();
-	if (IsValid(LocalController))
+	if (IsValid(InventorySlot))
 	{
-		AInventory_CPPCharacter* Character = Cast<AInventory_CPPCharacter>(LocalController->GetCharacter());
-		if (IsValid(Character))
+		if (!InventorySlot->Item_Category.IsEqual(FName("Equipment")))
+			return true;
+
+		UInventoryComponent* SourceInv = InventorySlot->InvComp;
+		int SourceIdx = InventorySlot->SlotIdx;
+		FName itemName = InventorySlot->Item_Name;
+
+		APlayerController* LocalController = GetGameInstance()->GetFirstLocalPlayerController();
+		if (IsValid(LocalController))
 		{
-			// Equip Item Through Character
-			Character->AttachEquipment_Server(DragVisualWidget->Item_ID);
+			AInventory_CPPCharacter* Character = Cast<AInventory_CPPCharacter>(LocalController->GetCharacter());
+			if (IsValid(Character))
+			{
+				// Equip Item Through Character
+				Character->AttachEquipment_Server(InventorySlot->Item_ID);
 
-			EquipItem_Image->SetBrushFromTexture(DragVisualWidget->Item_Texture2D);
-			EquipItem_Image->SetVisibility(ESlateVisibility::Visible);
+				EquipItem_Image->SetBrushFromTexture(InventorySlot->Item_Texture2D);
+				EquipItem_Image->SetVisibility(ESlateVisibility::Visible);
 
-			Item_ID = DragVisualWidget->Item_ID;
-			Item_Name = DragVisualWidget->Item_Name;
-			Item_Texture2D = DragVisualWidget->Item_Texture2D;
+				Item_ID = InventorySlot->Item_ID;
+				Item_Name = InventorySlot->Item_Name;
+				Item_Texture2D = InventorySlot->Item_Texture2D;
 
-			// Remove Item From Inventroy
-			SourceInv->RemoveItem_Server(SourceIdx, true, 1);
+				// Remove Item From Inventroy
+				SourceInv->RemoveItem_Server(SourceIdx, true, 1);
+			}
+		}
+	}
+	
+	UWidget_QuickSlot* EquipSlot = Cast<UWidget_QuickSlot>(InOperation->DefaultDragVisual);
+
+	if (IsValid(EquipSlot))
+	{
+		if (!EquipSlot->Item_Category.IsEqual(FName("Equipment")))
+			return true;
+
+		UInventoryComponent* SourceInv = EquipSlot->InvComp;
+		int SourceIdx = EquipSlot->SlotIdx;
+		FName itemName = EquipSlot->Item_Name;
+
+		APlayerController* LocalController = GetGameInstance()->GetFirstLocalPlayerController();
+		if (IsValid(LocalController))
+		{
+			AInventory_CPPCharacter* Character = Cast<AInventory_CPPCharacter>(LocalController->GetCharacter());
+			if (IsValid(Character))
+			{
+				// Equip Item Through Character
+				Character->AttachEquipment_Server(EquipSlot->Item_ID);
+
+				EquipItem_Image->SetBrushFromTexture(EquipSlot->Item_Texture2D);
+				EquipItem_Image->SetVisibility(ESlateVisibility::Visible);
+
+				Item_ID = EquipSlot->Item_ID;
+				Item_Name = EquipSlot->Item_Name;
+				Item_Texture2D = EquipSlot->Item_Texture2D;
+
+				// Remove Item From Inventroy
+				SourceInv->RemoveItem_Server(SourceIdx, true, 1);
+			}
 		}
 	}
 

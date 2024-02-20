@@ -85,7 +85,7 @@ void AInteractable_Item::Interact_With_Implementation(UInventoryComponent* Inven
 
 	if (InventoryComponent)
 	{
-		InventoryComponent->AddToInventory(ItemData_Slot);
+		InventoryComponent->AddToInventory_Server(ItemData_Slot);
 		InventoryComponent->LogInventoryContents();
 		Destroy();
 	}

@@ -60,7 +60,10 @@ public:
 	TArray<FSlotStructure>& GetContents() { return Contents; }
 	TArray<FSlotStructure>& GetQuickSlots() { return QuickSlots; }
 	void LogInventoryContents();
-	void AddToInventory(FSlotStructure ItemSlot);
+
+	UFUNCTION(Server, reliable, BlueprintCallable)
+	void AddToInventory_Server(FSlotStructure ItemSlot);
+	void AddToInventory_Server_Implementation(FSlotStructure ItemSlot);
 
 	UFUNCTION(Server, reliable, BlueprintCallable)
 	void RemoveItem_QuickSlot_Server(int SlotIndex, bool Consumed, int Quantity);

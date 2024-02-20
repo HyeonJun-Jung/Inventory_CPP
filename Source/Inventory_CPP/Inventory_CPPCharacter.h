@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Structure/ItemStructure.h"
+#include "PlayerEnums.h"
 #include "Inventory_CPPCharacter.generated.h"
 
 UCLASS(config=Game)
@@ -84,6 +85,9 @@ public:
 public:
 	class UInventoryComponent* InventoryComponent;
 
+	UPROPERTY()
+	UDataTable* ItemDB;
+
 	void Inventory();
 
 	void Interact();
@@ -93,8 +97,6 @@ public:
 	UFUNCTION(Server, reliable)
 	void Interact_Server(UInventoryComponent* InvComp);
 	void Interact_Server_Implementation(UInventoryComponent* InvComp);
-
-	
 
 
 /*
@@ -106,9 +108,15 @@ public:
 	void AttachEquipment_Server(FName ItemID);
 	void AttachEquipment_Server_Implementation(FName ItemID);
 
+	UFUNCTION(NetMulticast, reliable, BlueprintCallable)
+	void AttachEquipment_Multicast(FName ItemID);
+	void AttachEquipment_Multicast_Implementation(FName ItemID);
+
 	UFUNCTION(Server, reliable)
 	void DetachEquipment_Server(FName ItemID);
 	void DetachEquipment_Server_Implementation(FName ItemID);
+
+	EPlayerWeaponType WeaponType = EPlayerWeaponType::EPWT_None;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* Helmet;
@@ -124,6 +132,67 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
 	class USkeletalMeshComponent* Shoes;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Equipment, meta = (AllowPrivateAccess = "true"))
+	class USkeletalMeshComponent* Weapon;
 	
+
+/*
+///////////////////////////////////
+	Input & Animation & Montages 
+///////////////////////////////////
+*/
+	UFUNCTION(Server, reliable, BlueprintCallable)
+	void ChangeAnimInstance_Server(UClass* AnimInstance);
+	void ChangeAnimInstance_Server_Implementation(UClass* AnimInstance);
+
+	UFUNCTION(NetMulticast, reliable, BlueprintCallable)
+	void ChangeAnimInstance_Multicast(UClass* AnimInstance);
+	void ChangeAnimInstance_Multicast_Implementation(UClass* AnimInstance);
+
+	UFUNCTION(Server, reliable, BlueprintCallable)
+	void PlayMontage_Server(UAnimMontage* MontageToPlay);
+	void PlayMontage_Server_Implementation(UAnimMontage* MontageToPlay);
+
+	UFUNCTION(NetMulticast, reliable, BlueprintCallable)
+	void PlayMontage_Multicast(UAnimMontage* MontageToPlay);
+	void PlayMontage_Multicast_Implementation(UAnimMontage* MontageToPlay);
+
+	UFUNCTION()
+	void MontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	bool bMontagePlaying = false;
+
+	/*
+	////////////////////
+		Left Shift
+	///////////////////
+	*/
+	UFUNCTION()
+	void LeftShiftPress();
+
+	UFUNCTION()
+	void LeftShiftRelease();
+
+	bool LeftShiftPressed = false;
+
+
+	/*
+	////////////////////
+		Right Click
+	///////////////////
+	*/
+	UFUNCTION()
+	void LeftClick();
+
+	UPROPERTY(EditAnywhere, Category = RightClick, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* PunchMontage;
+
+	UPROPERTY(EditAnywhere, Category = RightClick, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* AxeAttackMontage;
+
+	UPROPERTY(EditAnywhere, Category = RightClick, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* AxeComboAttackMontage;
+
 };
 

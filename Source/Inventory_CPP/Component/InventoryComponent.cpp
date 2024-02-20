@@ -154,7 +154,7 @@ void UInventoryComponent::LogInventoryContents()
 	}
 }
 
-void UInventoryComponent::AddToInventory(FSlotStructure ItemSlot)
+void UInventoryComponent::AddToInventory_Server_Implementation(FSlotStructure ItemSlot)
 {
 	if (!ItemDB)
 	{

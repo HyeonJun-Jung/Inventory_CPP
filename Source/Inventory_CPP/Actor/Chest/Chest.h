@@ -29,6 +29,6 @@ public:
 public:
 	virtual void Interact_With_Implementation(UInventoryComponent* InventoryComponent) override;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
 	UInventoryComponent* Chest_InventoryComponent;
 };

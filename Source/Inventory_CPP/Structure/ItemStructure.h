@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+#include "PlayerEnums.h"
 #include "ItemStructure.generated.h"
 
 USTRUCT(BlueprintType)
@@ -35,6 +36,9 @@ struct INVENTORY_CPP_API FItemStructure : public FTableRowBase
 	TSubclassOf<AActor> ItemClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FTransform SpawnTransform;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USkeletalMesh* SkeletonMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -43,6 +47,12 @@ struct INVENTORY_CPP_API FItemStructure : public FTableRowBase
 	// For Equipment System
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName EquipType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EPlayerWeaponType WeaponType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UAnimInstance> WeaponAnimInstance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName SocketName;

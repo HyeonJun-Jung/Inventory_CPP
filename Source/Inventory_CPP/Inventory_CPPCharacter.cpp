@@ -69,6 +69,9 @@ AInventory_CPPCharacter::AInventory_CPPCharacter()
 	Shoes = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Shoes"));
 	Shoes->SetupAttachment(GetMesh());
 
+	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
+	Weapon->SetupAttachment(GetMesh());
+
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
@@ -86,7 +89,10 @@ void AInventory_CPPCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	// Relate to Inventory Key binding
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AInventory_CPPCharacter::Interact);
 	PlayerInputComponent->BindAction("Inventory", IE_Pressed, this, &AInventory_CPPCharacter::Inventory);
-	PlayerInputComponent->BindAction("Num", IE_Released, this, &AInventory_CPPCharacter::UpdateCurrentQuickSlot);
+	PlayerInputComponent->BindAction("Num", IE_Pressed, this, &AInventory_CPPCharacter::UpdateCurrentQuickSlot);
+	PlayerInputComponent->BindAction("LeftClick", IE_Pressed, this, &AInventory_CPPCharacter::LeftClick);
+	PlayerInputComponent->BindAction("LeftShift", IE_Pressed, this, &AInventory_CPPCharacter::LeftShiftPress);
+	PlayerInputComponent->BindAction("LeftShift", IE_Released, this, &AInventory_CPPCharacter::LeftShiftRelease);
 
 	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &AInventory_CPPCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right / Left", this, &AInventory_CPPCharacter::MoveRight);
@@ -108,12 +114,36 @@ void AInventory_CPPCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	/*FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &AInventory_CPPCharacter::MontageEnded);
+	AnimInstance->Montage_SetEndDelegate(EndDelegate);*/
+
+	if(IsLocallyControlled())
+		AnimInstance->OnMontageEnded.AddDynamic(this, &AInventory_CPPCharacter::MontageEnded);
+
+	// Set Equipment Master Pose Component
+	Armor->SetMasterPoseComponent(GetMesh());
+	Pants->SetMasterPoseComponent(GetMesh());
+	Glove->SetMasterPoseComponent(GetMesh());
+	Shoes->SetMasterPoseComponent(GetMesh());
+
+	UDataTable* BP_ItemDB = LoadObject<UDataTable>(this, TEXT("/Game/Inventory/Data/DB_ItemData.DB_ItemData"));
+	if (IsValid(BP_ItemDB))
+	{
+		ItemDB = BP_ItemDB;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("APlayer_Controller : Can't Get DataTable."))
+	}
 	
 	UE_LOG(LogTemp, Display, TEXT("AInventory_CPPCharacter: %s"), *GetName());
 	Controller = Cast<APlayer_Controller>(GetController());
 	if (!IsValid(Controller))
 	{
-		UE_LOG(LogTemp, Display, TEXT("AInventory_CPPCharacter: Can't Cast To APlayer_Controller"));
+		UE_LOG(LogTemp, Warning, TEXT("AInventory_CPPCharacter: Can't Cast To APlayer_Controller"));
 		return;
 	}
 	else
@@ -124,16 +154,11 @@ void AInventory_CPPCharacter::BeginPlay()
 	InventoryComponent = Controller->GetInventoryComponent();
 	if (!IsValid(InventoryComponent))
 	{
-		UE_LOG(LogTemp, Display, TEXT("AInventory_CPPCharacter: Can't Get InventoryComponent"));
+		UE_LOG(LogTemp, Warning, TEXT("AInventory_CPPCharacter: Can't Get InventoryComponent"));
 	}
 	else
 		UE_LOG(LogTemp, Display, TEXT("AInventory_CPPCharacter: Success to Get InventoryComponent"));
 
-	// Set Equipment Master Pose Component
-	Armor->SetMasterPoseComponent(GetMesh());
-	Pants->SetMasterPoseComponent(GetMesh());
-	Glove->SetMasterPoseComponent(GetMesh());
-	Shoes->SetMasterPoseComponent(GetMesh());
 }
 	
 
@@ -226,17 +251,6 @@ void AInventory_CPPCharacter::Interact_Server_Implementation(UInventoryComponent
 
 void AInventory_CPPCharacter::AttachEquipment_Server_Implementation(FName ItemID)
 {
-	if (!IsValid(Controller))
-	{
-		Controller = Cast<APlayer_Controller>(GetController());
-		if (!IsValid(Controller))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("AInventory_CPPCharacter : Can't Get Controller."), *ItemID.ToString());
-			return;
-		}
-	}
-
-	UDataTable* ItemDB = Controller->GetItemDB();
 	if (!IsValid(ItemDB))
 		return;
 
@@ -272,6 +286,74 @@ void AInventory_CPPCharacter::AttachEquipment_Server_Implementation(FName ItemID
 		if (IsValid(itemData->SkeletonMesh))
 			Shoes->SetSkeletalMesh(itemData->SkeletonMesh);
 	}
+	else if (itemData->EquipType.IsEqual(FName("Weapon")))
+	{
+		/*
+		if (IsValid(itemData->SkeletonMesh))
+		{
+			Weapon->AttachToComponent(GetMesh(), 
+				FAttachmentTransformRules::KeepRelativeTransform, FName(itemData->SocketName));
+			Weapon->SetSkeletalMesh(itemData->SkeletonMesh);
+			Weapon->SetRelativeTransform(itemData->RelativeTransform);	
+		}
+		if (IsValid(itemData->WeaponAnimInstance))
+			ChangeAnimInstance_Server(itemData->WeaponAnimInstance);
+		WeaponType = itemData->WeaponType;
+		*/
+		AttachEquipment_Multicast(ItemID);
+	}
+}
+
+void AInventory_CPPCharacter::AttachEquipment_Multicast_Implementation(FName ItemID)
+{
+	if (!IsValid(ItemDB))
+		return;
+
+	FItemStructure* itemData = ItemDB->FindRow<FItemStructure>(ItemID, ItemID.ToString());
+	if (!itemData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AInventory_CPPCharacter : Can't Find ItemID From ItemDB."), *ItemID.ToString());
+		return;
+	}
+
+	if (itemData->EquipType.IsEqual(FName("Helmet")))
+	{
+		if (IsValid(itemData->StaticMesh))
+			Helmet->SetStaticMesh(itemData->StaticMesh);
+	}
+	else if (itemData->EquipType.IsEqual(FName("Armor")))
+	{
+		if (IsValid(itemData->SkeletonMesh))
+			Armor->SetSkeletalMesh(itemData->SkeletonMesh);
+	}
+	else if (itemData->EquipType.IsEqual(FName("Glove")))
+	{
+		if (IsValid(itemData->SkeletonMesh))
+			Glove->SetSkeletalMesh(itemData->SkeletonMesh);
+	}
+	else if (itemData->EquipType.IsEqual(FName("Pants")))
+	{
+		if (IsValid(itemData->SkeletonMesh))
+			Pants->SetSkeletalMesh(itemData->SkeletonMesh);
+	}
+	else if (itemData->EquipType.IsEqual(FName("Shoes")))
+	{
+		if (IsValid(itemData->SkeletonMesh))
+			Shoes->SetSkeletalMesh(itemData->SkeletonMesh);
+	}
+	else if (itemData->EquipType.IsEqual(FName("Weapon")))
+	{
+		if (IsValid(itemData->SkeletonMesh))
+		{
+			Weapon->AttachToComponent(GetMesh(),
+				FAttachmentTransformRules::KeepRelativeTransform, FName(itemData->SocketName));
+			Weapon->SetSkeletalMesh(itemData->SkeletonMesh);
+			Weapon->SetRelativeTransform(itemData->RelativeTransform);
+		}
+		if (IsValid(itemData->WeaponAnimInstance))
+			ChangeAnimInstance_Server(itemData->WeaponAnimInstance);
+		WeaponType = itemData->WeaponType;
+	}
 }
 
 void AInventory_CPPCharacter::DetachEquipment_Server_Implementation(FName ItemID)
@@ -279,7 +361,6 @@ void AInventory_CPPCharacter::DetachEquipment_Server_Implementation(FName ItemID
 	if (!IsValid(Controller))
 		return;
 
-	UDataTable* ItemDB = Controller->GetItemDB();
 	if (!IsValid(ItemDB))
 		return;
 
@@ -310,6 +391,76 @@ void AInventory_CPPCharacter::DetachEquipment_Server_Implementation(FName ItemID
 	{
 		Shoes->SetSkeletalMesh(nullptr);
 	}
+
+}
+
+void AInventory_CPPCharacter::ChangeAnimInstance_Server_Implementation(UClass* AnimInstance)
+{
+	ChangeAnimInstance_Multicast(AnimInstance);
+}
+
+void AInventory_CPPCharacter::ChangeAnimInstance_Multicast_Implementation(UClass* AnimInstance)
+{
+	GetMesh()->SetAnimInstanceClass(AnimInstance);
+	GetMesh()->GetAnimInstance()->OnMontageEnded.AddDynamic(this, &AInventory_CPPCharacter::MontageEnded);
+}
+
+void AInventory_CPPCharacter::PlayMontage_Server_Implementation(UAnimMontage* MontageToPlay)
+{
+	PlayMontage_Multicast(MontageToPlay);
+}
+
+void AInventory_CPPCharacter::PlayMontage_Multicast_Implementation(UAnimMontage* MontageToPlay)
+{
+	GetMesh()->GetAnimInstance()->Montage_Play(MontageToPlay);
+	bMontagePlaying = true;
+}
+
+void AInventory_CPPCharacter::MontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	UE_LOG(LogTemp, Display, TEXT("AInventory_CPPCharacter: MontageEnded"));
+	if(!bInterrupted)
+		bMontagePlaying = false;
+}
+
+void AInventory_CPPCharacter::LeftShiftPress()
+{
+	LeftShiftPressed = true;
+}
+
+void AInventory_CPPCharacter::LeftShiftRelease()
+{
+	LeftShiftPressed = false;
+}
+
+
+void AInventory_CPPCharacter::LeftClick()
+{
+	if (bMontagePlaying)
+		return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	UAnimMontage* MontageToPlay = nullptr;
+
+	switch (WeaponType)
+	{
+	case EPlayerWeaponType::EPWT_None:
+		MontageToPlay = PunchMontage;
+		break;
+	case EPlayerWeaponType::EPWT_Axe:
+		if (LeftShiftPressed)
+			MontageToPlay = AxeComboAttackMontage;
+		else
+			MontageToPlay = AxeAttackMontage;
+		break;
+	default:
+		break;
+	}
+
+	if (IsValid(MontageToPlay))
+		PlayMontage_Server(MontageToPlay);
+
+	bMontagePlaying = true;
 }
 
 void AInventory_CPPCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
