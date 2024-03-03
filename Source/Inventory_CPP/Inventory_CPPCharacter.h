@@ -179,7 +179,7 @@ public:
 
 	/*
 	////////////////////
-		Right Click
+		Left Click
 	///////////////////
 	*/
 	UFUNCTION()
@@ -193,6 +193,25 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = RightClick, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AxeComboAttackMontage;
+
+	/*
+	////////////////////
+		Right Click
+	///////////////////
+	*/
+	UFUNCTION()
+	void RightClickPress();
+
+	UFUNCTION()
+	void RightClickRelease();
+
+	bool bRightClick = false;
+
+	UPROPERTY(EditAnywhere, Category = RightClick, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* AxeGuardMontage;
+
+	UPROPERTY(EditAnywhere, Category = RightClick, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* AxeGuardHitMontage;
 
 };
 

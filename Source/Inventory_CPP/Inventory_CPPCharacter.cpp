@@ -91,6 +91,8 @@ void AInventory_CPPCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	PlayerInputComponent->BindAction("Inventory", IE_Pressed, this, &AInventory_CPPCharacter::Inventory);
 	PlayerInputComponent->BindAction("Num", IE_Pressed, this, &AInventory_CPPCharacter::UpdateCurrentQuickSlot);
 	PlayerInputComponent->BindAction("LeftClick", IE_Pressed, this, &AInventory_CPPCharacter::LeftClick);
+	PlayerInputComponent->BindAction("RightClick", IE_Pressed, this, &AInventory_CPPCharacter::RightClickPress);
+	PlayerInputComponent->BindAction("RightClick", IE_Released, this, &AInventory_CPPCharacter::RightClickRelease);
 	PlayerInputComponent->BindAction("LeftShift", IE_Pressed, this, &AInventory_CPPCharacter::LeftShiftPress);
 	PlayerInputComponent->BindAction("LeftShift", IE_Released, this, &AInventory_CPPCharacter::LeftShiftRelease);
 
@@ -461,6 +463,16 @@ void AInventory_CPPCharacter::LeftClick()
 		PlayMontage_Server(MontageToPlay);
 
 	bMontagePlaying = true;
+}
+
+void AInventory_CPPCharacter::RightClickPress()
+{
+	bRightClick = true;
+}
+
+void AInventory_CPPCharacter::RightClickRelease()
+{
+	bRightClick = false;
 }
 
 void AInventory_CPPCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
